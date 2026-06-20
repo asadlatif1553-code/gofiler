@@ -235,6 +235,11 @@ main{flex:1;padding:24px;overflow-y:auto;max-width:860px;-webkit-overflow-scroll
   .summary-grid{grid-template-columns:1fr}
   /* ── Advisor dashboard ── */
   .adv-client-actions{flex-direction:row;gap:6px}
+  /* ── Step wizard compact on mobile ── */
+  #stepWizard{padding:10px 12px;margin-bottom:14px}
+  .sw-label{display:none}
+  .sw-dot{width:24px;height:24px;font-size:10px}
+  .sw-line{margin:0 4px;min-width:6px}
   /* ── Lead modal ── */
   #leadModal{border-radius:12px}
   #leadModal .lm-header{padding:16px 18px 12px}
@@ -2357,6 +2362,11 @@ async function _saveReturn() {
       rawCnic = _sess.id.replace(/[^0-9]/g,"");
   }
   if (!rawCnic || rawCnic.length < 13) { toast("Enter a valid 13-digit CNIC first.", true); return; }
+  // Data isolation: taxpayers can only save their own CNIC
+  const _savesess = getSession();
+  if (_savesess && _savesess.type === "taxpayer" && _savesess.id && _savesess.id.replace(/[^0-9]/g,"") !== rawCnic) {
+    toast("You can only save your own return.", true); return;
+  }
   // Sync CNIC back to form so it sticks
   const _cnicEl = document.getElementById("cnic");
   if (_cnicEl && !_cnicEl.value) _cnicEl.value = rawCnic;
@@ -2423,6 +2433,12 @@ async function loadSavedList() {
 
 async function loadReturn(cnic) {
   const key = cnic.replace(/[^0-9]/g,"");
+  // Data isolation: taxpayers may only load their own return
+  const _s = getSession();
+  if (_s && _s.type === "taxpayer" && _s.id && _s.id.replace(/[^0-9]/g,"") !== key) {
+    console.warn("Data isolation: blocked cross-user return load");
+    return;
+  }
   let data = null;
 
   // 1. Try Firestore (cross-device source of truth)
