@@ -1,0 +1,49 @@
+{
+  "name": "GoFiler — Pakistan Tax Return",
+  "short_name": "GoFiler",
+  "description": "Pakistan Income Tax Return, Tax Planner & FBR Filer Checker — Tax Year 2026",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0f172a",
+  "theme_color": "#1e3a5f",
+  "lang": "en-PK",
+  "categories": ["finance", "productivity"],
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Tax Calculator",
+      "short_name": "Calculate",
+      "description": "Jump to Income tab",
+      "url": "/?tab=income",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Filer Check",
+      "short_name": "Filer",
+      "description": "Check FBR ATL status",
+      "url": "/?tab=filer",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}
