@@ -4281,7 +4281,12 @@ function caSetRole(role) {
   const lbl = document.getElementById("caIdLabel");
   const inp = document.getElementById("caId");
   if (lbl) lbl.textContent = role === "taxpayer" ? "CNIC (13 digits)" : "Email / Username";
-  if (inp) inp.placeholder = role === "taxpayer" ? "3520212345678" : "you@example.com";
+  if (inp) {
+    inp.placeholder    = role === "taxpayer" ? "3520212345678" : "you@example.com";
+    inp.inputMode      = role === "taxpayer" ? "numeric" : "email";
+    inp.maxLength      = role === "taxpayer" ? 13 : 254;
+    inp.type           = role === "taxpayer" ? "text" : "email";
+  }
   document.getElementById("caErr").textContent = "";
 }
 
@@ -5377,11 +5382,15 @@ function _generatePDF() {
       <input type="tel" id="caPhone" placeholder="+92 300 0000000" autocomplete="tel" inputmode="tel">
     </div>
     <div class="ca-field">
-      <label>PIN (minimum 6 characters)</label>
+      <label>PIN (minimum 4 characters)</label>
       <input type="password" id="caPin" placeholder="Choose a PIN" autocomplete="new-password">
     </div>
+    <div class="ca-field">
+      <label>Confirm PIN</label>
+      <input type="password" id="caPin2" placeholder="Re-enter PIN" autocomplete="new-password">
+    </div>
     <div id="caErr" style="color:#f87171;font-size:12px;min-height:16px;margin-bottom:4px"></div>
-    <button class="ls-btn" onclick="createAccount()">Create Account →</button>
+    <button class="ls-btn ca-submit" onclick="createAccount()">Create Account →</button>
     <div class="ls-link"><a href="#" onclick="document.getElementById('createAccountModal').classList.add('hidden');return false">← Back to Sign In</a></div>
   </div>
 </div>
