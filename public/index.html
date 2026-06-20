@@ -627,7 +627,7 @@ input[type=range].ps::-moz-range-thumb{width:18px;height:18px;border-radius:50%;
 #addClientModal.hidden{display:none}
 /* ── Step Wizard ── */
 #stepWizard{display:flex;align-items:center;background:#ffffff;border:1px solid var(--border);border-radius:12px;padding:14px 20px;margin-bottom:20px;gap:0;box-shadow:0 1px 4px rgba(0,0,0,.04)}
-.sw-step{display:flex;align-items:center;flex:1;gap:0;cursor:pointer}
+.sw-step{display:flex;align-items:center;flex:1;gap:0;cursor:default;pointer-events:none}
 .sw-step:last-child{flex:none}
 .sw-dot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;transition:all .2s;border:2px solid var(--border);background:#fff;color:var(--muted)}
 .sw-dot.done{background:var(--green);border-color:var(--green);color:#fff}
@@ -698,27 +698,27 @@ input[type=range].ps::-moz-range-thumb{width:18px;height:18px;border-radius:50%;
 
     <!-- ── Step Wizard ── -->
     <div id="stepWizard">
-      <div class="sw-step" onclick="document.querySelector('[data-tab=personal]').click()">
+      <div class="sw-step">
         <div class="sw-dot active" id="sw-personal">1</div>
         <span class="sw-label active" id="swl-personal">Personal</span>
       </div>
       <div class="sw-line" id="swline-1"></div>
-      <div class="sw-step" onclick="document.querySelector('[data-tab=income]').click()">
+      <div class="sw-step">
         <div class="sw-dot" id="sw-income">2</div>
         <span class="sw-label" id="swl-income">Income</span>
       </div>
       <div class="sw-line" id="swline-2"></div>
-      <div class="sw-step" onclick="document.querySelector('[data-tab=deductions]').click()">
+      <div class="sw-step">
         <div class="sw-dot" id="sw-deductions">3</div>
         <span class="sw-label" id="swl-deductions">Deductions</span>
       </div>
       <div class="sw-line" id="swline-3"></div>
-      <div class="sw-step" onclick="document.querySelector('[data-tab=wealth]').click()">
+      <div class="sw-step">
         <div class="sw-dot" id="sw-wealth">4</div>
         <span class="sw-label" id="swl-wealth">Wealth</span>
       </div>
       <div class="sw-line" id="swline-4"></div>
-      <div class="sw-step" onclick="document.querySelector('[data-tab=summary]').click()">
+      <div class="sw-step">
         <div class="sw-dot" id="sw-summary">5</div>
         <span class="sw-label" id="swl-summary">Summary</span>
       </div>
