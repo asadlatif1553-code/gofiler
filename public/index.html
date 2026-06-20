@@ -2307,7 +2307,7 @@ document.getElementById("saveBtn").addEventListener("click", saveReturn);
 
 function lsKey(cnic) { return "tr26_" + cnic.replace(/[^0-9]/g,""); }
 
-async function saveReturn() { showLeadCapture(_saveReturn); }
+async function saveReturn() { showLeadCapture(_saveReturn, 'save'); }
 async function _saveReturn() {
   collectForm();
   const rawCnic = D.cnic.replace(/[^0-9]/g,"");
@@ -3711,7 +3711,7 @@ function irisCopyAll() {
 }
 
 /* ─── WhatsApp Share ─── */
-async function shareWhatsApp() { showLeadCapture(_shareWhatsApp); }
+async function shareWhatsApp() { showLeadCapture(_shareWhatsApp, 'share'); }
 async function _shareWhatsApp() {
   collectForm();
   let c;
@@ -4724,13 +4724,15 @@ function calcSurcharge() {
   document.getElementById("sc-total").textContent = fmtRs(tax + sc);
 }
 
-function showLeadCapture(callback) {
-  // If already submitted this session, proceed immediately
+let _leadAction = "";
+function showLeadCapture(callback, action) {
+  // If already submitted, proceed immediately
   if (localStorage.getItem("gf_lead_done") === "1") {
     callback();
     return;
   }
   _leadCallback = callback;
+  _leadAction   = action || "";
   // Pre-fill from previous partial save
   const saved = JSON.parse(localStorage.getItem("gf_lead_data") || "{}");
   document.getElementById("leadEmail").value = saved.email || "";
@@ -4763,18 +4765,34 @@ async function leadSubmit() {
   localStorage.setItem("gf_lead_data", JSON.stringify({email, phone}));
   localStorage.setItem("gf_lead_done", "1");
 
-  // Build lead object safely
+  // Build lead object
   let leadName = "", leadCnic = "";
   try { const fd = collectForm(); leadName = fd.name||""; leadCnic = fd.cnic||""; } catch(_){}
+  const sess = getSession();
+  if (!leadName && sess) leadName = sess.name || "";
+  if (!leadCnic && sess) leadCnic = sess.id   || "";
 
-  // Fire-and-forget server save
-  fetch("/api/lead", {
-    method : "POST",
-    headers: {"Content-Type":"application/json"},
-    body   : JSON.stringify({ email, phone, name: leadName, cnic: leadCnic, ts: new Date().toISOString(), source: "gofiler-ty2026" })
-  }).catch(() => {});
+  const leadDoc = {
+    email,
+    phone,
+    name   : leadName,
+    cnic   : leadCnic,
+    action : _leadAction,          // 'pdf' | 'save' | 'share'
+    uid    : sess?.uid || null,
+    ts     : new Date().toISOString(),
+    source : "gofiler-ty2026"
+  };
+
+  // Save to Firestore leads/ collection (fire-and-forget)
+  _db.collection("leads").add(leadDoc).catch(e => console.warn("Lead save:", e));
 
   // Close modal and proceed immediately
+  document.getElementById("leadOverlay").classList.remove("show");
+  if (_leadCallback) { const cb = _leadCallback; _leadCallback = null; cb(); }
+}
+
+function leadSkip() {
+  // Allow proceeding without submitting — do not mark gf_lead_done so we ask again next time
   document.getElementById("leadOverlay").classList.remove("show");
   if (_leadCallback) { const cb = _leadCallback; _leadCallback = null; cb(); }
 }
@@ -4993,7 +5011,7 @@ const FIELD_TIPS = {
   });
 })();
 
-function generatePDF() { showLeadCapture(_generatePDF); }
+function generatePDF() { showLeadCapture(_generatePDF, 'pdf'); }
 function _generatePDF() {
   // Gather fresh data
   collectForm();
@@ -5506,6 +5524,7 @@ function calcExtraWht() {
       </div>
       <div class="lm-actions">
         <button class="lm-submit" id="leadSubmitBtn" onclick="leadSubmit()">✅ Continue &amp; Proceed</button>
+        <button onclick="leadSkip()" style="background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;padding:4px;text-decoration:underline">Skip for now</button>
       </div>
       <div class="lm-note">🔒 Your data stays private. We never share it with third parties.</div>
     </div>
