@@ -29,6 +29,30 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <!-- html2canvas for WhatsApp share image (cached by SW) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<!-- Firebase SDK (Spark free plan — 50k reads/day, 20k writes/day, 1GB storage) -->
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyBNuFA1LBm8DmO0vg-xIHmLnHT-5sSppT4",
+  authDomain: "gofiler.firebaseapp.com",
+  projectId: "gofiler",
+  storageBucket: "gofiler.firebasestorage.app",
+  messagingSenderId: "553710020766",
+  appId: "1:553710020766:web:97c55c83835f8a2cc5738f"
+};
+firebase.initializeApp(firebaseConfig);
+const _auth = firebase.auth();
+const _db   = firebase.firestore();
+// Enable Firestore offline persistence (uses IndexedDB — works on Spark plan)
+_db.enablePersistence({ synchronizeTabs: true }).catch(e => {
+  if (e.code !== "failed-precondition" && e.code !== "unimplemented")
+    console.warn("Firestore offline persistence:", e.code);
+});
+// Pad PIN to meet Firebase's 6-char minimum (transparent to user)
+function _fbPin(pin) { return pin + "_gf"; }
+</script>
 <style>
 /* ── Reset & Base ── */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -58,7 +82,7 @@ nav{width:200px;flex-shrink:0;background:var(--surface);border-right:1px solid v
 .nav-item .icon{font-size:16px;width:20px;text-align:center}
 .nav-badge{margin-left:auto;background:var(--green);color:#fff;font-size:10px;padding:2px 6px;border-radius:10px;font-weight:700}
 /* ── Main ── */
-main{flex:1;padding:24px;overflow-y:auto;max-width:860px}
+main{flex:1;padding:24px;overflow-y:auto;max-width:860px;-webkit-overflow-scrolling:touch}
 .tab-panel{display:none}
 .tab-panel.active{display:block}
 /* ── Cards ── */
@@ -144,12 +168,75 @@ main{flex:1;padding:24px;overflow-y:auto;max-width:860px}
 #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#ffffff;border:1px solid var(--green);color:var(--green);padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;transition:transform .3s;z-index:999;box-shadow:0 4px 16px rgba(0,0,0,.12)}
 #toast.show{transform:translateX(-50%) translateY(0)}
 #toast.error{border-color:var(--red);color:var(--red)}
-/* ── Responsive nav ── */
+/* ══════════════════════════════════════════
+   MOBILE — Bottom Tab Nav + Layout
+   ══════════════════════════════════════════ */
 @media(max-width:640px){
-  nav{width:56px}
-  .nav-item span,.nav-item .nav-badge{display:none}
-  .nav-item{justify-content:center;padding:12px}
-  main{padding:14px}
+  /* ── Bottom tab bar ── */
+  nav{
+    position:fixed;bottom:0;left:0;right:0;
+    width:100%;height:60px;
+    flex-direction:row;align-items:stretch;
+    padding:0;gap:0;
+    border-right:none;border-top:1px solid var(--border);
+    background:var(--surface);
+    overflow-x:auto;overflow-y:hidden;
+    scroll-snap-type:x mandatory;
+    -webkit-overflow-scrolling:touch;
+    z-index:150;
+  }
+  nav::-webkit-scrollbar{display:none}
+  .nav-item{
+    flex-direction:column;align-items:center;justify-content:center;
+    gap:2px;padding:6px 12px;
+    border-left:none;border-top:3px solid transparent;border-radius:0;
+    flex-shrink:0;min-width:60px;scroll-snap-align:start;
+  }
+  .nav-item span{display:inline;font-size:9px;font-weight:600;white-space:nowrap}
+  .nav-item .nav-badge{display:none}
+  .nav-item .icon{font-size:19px;width:auto}
+  .nav-item.active{border-left:none;border-top:3px solid var(--accent);background:rgba(59,130,246,.07)}
+  body[data-mode="advisor"] .nav-item.advisor-only{display:flex}
+  /* ── Main content — clear bottom nav ── */
+  .app{flex-direction:column}
+  main{padding:14px 14px 76px;max-width:100%}
+  /* ── Header compact ── */
+  header{padding:10px 14px;gap:8px}
+  header h1{font-size:15px}
+  header span{display:none}
+  #saveBtn{padding:6px 12px;font-size:12px}
+  /* ── Cards ── */
+  .card{padding:14px}
+  /* ── Touch-friendly inputs — prevent iOS zoom ── */
+  .field input,.field select,
+  .ls-field input,
+  .wealth-inp,.wealth-inp-sel,
+  .dep-inp,.bank-inp,.wht-inp{font-size:16px!important}
+  /* ── Login screen on small screens ── */
+  .ls-box{padding:24px 20px;border-radius:14px}
+  .ls-title{font-size:20px}
+  /* ── Role picker cards stacked ── */
+  .role-cards{flex-direction:column;align-items:center}
+  .role-card{min-width:0;width:100%;max-width:320px}
+  /* ── Balance box ── */
+  .balance-amount{font-size:26px}
+  /* ── Filer input row ── */
+  .filer-input-row{flex-direction:column}
+  #filerCheckBtn{width:100%}
+  /* ── WHT tables — horizontal scroll ── */
+  .wht-hdr,.wht-row{min-width:520px}
+  .bank-tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  /* ── Summary grid ── */
+  .summary-grid{grid-template-columns:1fr}
+  /* ── Advisor dashboard ── */
+  .adv-client-actions{flex-direction:row;gap:6px}
+  /* ── Lead modal ── */
+  #leadModal{border-radius:12px}
+  #leadModal .lm-header{padding:16px 18px 12px}
+  #leadModal .lm-body{padding:16px 18px}
+  /* ── PDF / action buttons ── */
+  .action-btns-row{flex-wrap:wrap;gap:8px}
+  .action-btns-row button{flex:1;min-width:120px}
 }
 /* ── Filer Check ── */
 .filer-input-row{display:flex;gap:10px;align-items:flex-end;margin-bottom:16px}
@@ -2227,12 +2314,17 @@ async function _saveReturn() {
   if (!rawCnic || rawCnic.length < 13) { toast("Enter a valid 13-digit CNIC first.", true); return; }
   const entry = { cnic: rawCnic, name: D.name, savedAt: new Date().toISOString(), returnData: D };
 
-  // Always save to localStorage
+  // 1. Always save to localStorage cache
   const ls = JSON.parse(localStorage.getItem("taxreturns") || "{}");
   ls[rawCnic] = entry;
   localStorage.setItem("taxreturns", JSON.stringify(ls));
 
-  // Also try server (best-effort)
+  // 2. Save to Firestore (primary — cross-device persistence)
+  try {
+    await _db.collection("returns").doc(rawCnic).set(entry);
+  } catch(e) { console.warn("Firestore save failed:", e); }
+
+  // 3. Legacy server (best-effort — no-op on Vercel)
   try {
     await fetch(`/api/return/${rawCnic}`, {
       method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(D)
@@ -2242,23 +2334,33 @@ async function _saveReturn() {
   toast("Return saved for " + (D.name || rawCnic));
 }
 
-/* ─── Load saved list (merge server + localStorage) ─── */
+/* ─── Load saved list (Firestore primary, localStorage fallback) ─── */
 async function loadSavedList() {
   const el = document.getElementById("savedList");
   const merged = {};
 
-  // 1. localStorage
+  // 1. localStorage cache (immediate render)
   const ls = JSON.parse(localStorage.getItem("taxreturns") || "{}");
   Object.assign(merged, ls);
 
-  // 2. server (best-effort)
+  // 2. Firestore (cross-device source of truth)
   try {
-    const r = await fetch("/api/returns");
-    const j = await r.json();
-    j.list.forEach(item => {
-      if (!merged[item.cnic]) merged[item.cnic] = item;
-    });
-  } catch(_) {}
+    const sess = getSession();
+    if (sess) {
+      if (sess.type === "advisor") {
+        // Advisor: load returns for all their clients
+        const clients = await _getAdvisorClients();
+        for (const c of clients) {
+          const snap = await _db.collection("returns").doc(c.cnic).get();
+          if (snap.exists) merged[c.cnic] = snap.data();
+        }
+      } else {
+        // Taxpayer: only their own return
+        const snap = await _db.collection("returns").doc(sess.id).get();
+        if (snap.exists) merged[sess.id] = snap.data();
+      }
+    }
+  } catch(e) { console.warn("Firestore list failed:", e); }
 
   const list = Object.values(merged);
   if (!list.length) { el.innerHTML = "<div style='color:var(--muted);font-size:13px'>No saved returns yet.</div>"; return; }
@@ -2275,20 +2377,35 @@ async function loadReturn(cnic) {
   const key = cnic.replace(/[^0-9]/g,"");
   let data = null;
 
-  // Try server first
+  // 1. Try Firestore (cross-device source of truth)
   try {
-    const r = await fetch(`/api/return/${key}`);
-    const j = await r.json();
-    if (j.ok) data = j.data;
-  } catch(_) {}
+    const snap = await _db.collection("returns").doc(key).get();
+    if (snap.exists) {
+      const entry = snap.data();
+      data = entry.returnData || entry;
+      // Update localStorage cache
+      const ls = JSON.parse(localStorage.getItem("taxreturns") || "{}");
+      ls[key] = entry;
+      localStorage.setItem("taxreturns", JSON.stringify(ls));
+    }
+  } catch(e) { console.warn("Firestore load failed:", e); }
 
-  // Fall back to localStorage
+  // 2. Fall back to localStorage cache
   if (!data) {
     const ls = JSON.parse(localStorage.getItem("taxreturns") || "{}");
     data = ls[key]?.returnData || null;
   }
 
-  if (!data) { toast("Could not load return.", true); return; }
+  // 3. Try legacy server (best-effort)
+  if (!data) {
+    try {
+      const r = await fetch(`/api/return/${key}`);
+      const j = await r.json();
+      if (j.ok) data = j.data;
+    } catch(_) {}
+  }
+
+  if (!data) { toast("No saved return found for this CNIC.", true); return; }
   populateForm(data);
   document.querySelector("[data-tab=personal]").click();
   toast("Return loaded for " + (data.name || key));
@@ -2297,9 +2414,13 @@ async function loadReturn(cnic) {
 async function deleteReturn(cnic) {
   if (!confirm("Delete return for " + cnic + "?")) return;
   const key = cnic.replace(/[^0-9]/g,"");
+  // Remove from localStorage cache
   const ls = JSON.parse(localStorage.getItem("taxreturns") || "{}");
   delete ls[key];
   localStorage.setItem("taxreturns", JSON.stringify(ls));
+  // Delete from Firestore
+  try { await _db.collection("returns").doc(key).delete(); } catch(e) { console.warn("Firestore delete:", e); }
+  // Legacy server (best-effort)
   try { await fetch(`/api/return/${key}`, { method:"DELETE" }); } catch(_) {}
   loadSavedList();
   toast("Deleted.");
@@ -3783,10 +3904,12 @@ async function hashPin(pin) {
   return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,"0")).join("");
 }
 
-function getAccounts() { return JSON.parse(localStorage.getItem("gf_accounts") || "{}"); }
-function saveAccounts(a) { localStorage.setItem("gf_accounts", JSON.stringify(a)); }
+// gf_accounts is now Firebase Auth + Firestore; localStorage only used for session caching
 function getSession() { return JSON.parse(localStorage.getItem("gf_session") || "null"); }
-function saveSession(s) { localStorage.setItem("gf_session", JSON.stringify(s)); }
+function saveSession(s) {
+  if (s) localStorage.setItem("gf_session", JSON.stringify(s));
+  else localStorage.removeItem("gf_session");
+}
 
 function showLoginScreen() {
   document.getElementById("loginScreen").classList.remove("hidden");
@@ -3808,54 +3931,62 @@ function _enterApp(mode) {
 }
 
 async function loginUser() {
-  const tab = document.querySelector(".ls-tab.active")?.dataset.role || "taxpayer";
-  const idVal = (document.getElementById("lsId")?.value || "").trim();
-  const pin   = (document.getElementById("lsPin")?.value || "").trim();
-  const errEl = document.getElementById("lsErr");
+  const tab    = document.querySelector(".ls-tab.active")?.dataset.role || "taxpayer";
+  const idVal  = (document.getElementById("lsId")?.value  || "").trim();
+  const pin    = (document.getElementById("lsPin")?.value || "").trim();
+  const errEl  = document.getElementById("lsErr");
+  const btnEl  = document.querySelector(".ls-btn");
   errEl.textContent = "";
 
   if (!idVal || !pin) { errEl.textContent = "Please fill in all fields."; return; }
 
-  const accounts = getAccounts();
-  const key = tab + ":" + (tab === "taxpayer" ? idVal.replace(/[^0-9]/g,"") : idVal.toLowerCase());
-  const acc = accounts[key];
+  const normalId = tab === "taxpayer" ? idVal.replace(/[^0-9]/g,"") : idVal.toLowerCase();
+  if (tab === "taxpayer" && normalId.length !== 13) { errEl.textContent = "CNIC must be 13 digits."; return; }
 
-  if (!acc) {
-    // If no accounts exist at all, prompt to create
-    if (!Object.keys(accounts).length) {
-      errEl.textContent = "No account found. Please create one below.";
+  const email = tab === "taxpayer" ? `taxpayer_${normalId}@gofiler.app` : normalId;
+  if (btnEl) { btnEl.disabled = true; btnEl.textContent = "Signing in…"; }
+
+  try {
+    const cred = await _auth.signInWithEmailAndPassword(email, _fbPin(pin));
+    const uid  = cred.user.uid;
+    const snap = await _db.collection("users").doc(uid).get();
+    const profile = snap.exists ? snap.data() : { type: tab, cnic: normalId, name: idVal };
+    const session = { type: profile.type, id: profile.cnic || profile.username || normalId, name: profile.name, uid };
+    saveSession(session);
+
+    if (tab === "advisor") {
+      document.getElementById("loginScreen").classList.add("hidden");
+      showAdvisorDashboard();
     } else {
-      errEl.textContent = "Account not found. Check your details or create an account.";
+      _enterApp("individual");
+      if (profile.cnic) setTimeout(() => loadReturn(profile.cnic), 150);
     }
-    return;
-  }
-
-  const h = await hashPin(pin);
-  if (h !== acc.pinHash) { errEl.textContent = "Incorrect PIN."; return; }
-
-  const session = { type: tab, id: tab === "taxpayer" ? acc.cnic : acc.username, name: acc.name };
-  saveSession(session);
-
-  if (tab === "advisor") {
-    document.getElementById("loginScreen").classList.add("hidden");
-    showAdvisorDashboard();
-  } else {
-    // Taxpayer — load their own return
-    _enterApp("individual");
-    const cnic = acc.cnic;
-    if (cnic) {
-      setTimeout(() => loadReturn(cnic), 100);
+  } catch(e) {
+    const code = e.code || "";
+    if (code === "auth/user-not-found" || code === "auth/invalid-credential" || code === "auth/invalid-email") {
+      errEl.textContent = "Account not found. Please create one below.";
+    } else if (code === "auth/wrong-password") {
+      errEl.textContent = "Incorrect PIN.";
+    } else if (code === "auth/network-request-failed") {
+      errEl.textContent = "No internet connection. Please connect and try again.";
+    } else if (code === "auth/too-many-requests") {
+      errEl.textContent = "Too many attempts. Please wait a moment and try again.";
+    } else {
+      errEl.textContent = "Login failed: " + e.message;
     }
+  } finally {
+    if (btnEl) { btnEl.disabled = false; btnEl.textContent = "Login →"; }
   }
 }
 
 async function createAccount() {
-  const role  = document.querySelector(".ca-role-btn.active")?.dataset.role || "taxpayer";
-  const name  = (document.getElementById("caName")?.value  || "").trim();
-  const idVal = (document.getElementById("caId")?.value    || "").trim();
-  const pin   = (document.getElementById("caPin")?.value   || "").trim();
-  const pin2  = (document.getElementById("caPin2")?.value  || "").trim();
-  const errEl = document.getElementById("caErr");
+  const role   = document.querySelector(".ca-role-btn.active")?.dataset.role || "taxpayer";
+  const name   = (document.getElementById("caName")?.value  || "").trim();
+  const idVal  = (document.getElementById("caId")?.value    || "").trim();
+  const pin    = (document.getElementById("caPin")?.value   || "").trim();
+  const pin2   = (document.getElementById("caPin2")?.value  || "").trim();
+  const errEl  = document.getElementById("caErr");
+  const btnEl  = document.querySelector(".ca-submit");
   errEl.textContent = "";
 
   if (!name || !idVal || !pin || !pin2) { errEl.textContent = "All fields are required."; return; }
@@ -3865,40 +3996,51 @@ async function createAccount() {
   const normalId = role === "taxpayer" ? idVal.replace(/[^0-9]/g,"") : idVal.toLowerCase();
   if (role === "taxpayer" && normalId.length !== 13) { errEl.textContent = "CNIC must be 13 digits."; return; }
 
-  const key = role + ":" + normalId;
-  const accounts = getAccounts();
-  if (accounts[key]) { errEl.textContent = "An account with this " + (role==="taxpayer"?"CNIC":"email") + " already exists."; return; }
+  const email = role === "taxpayer" ? `taxpayer_${normalId}@gofiler.app` : normalId;
+  if (btnEl) { btnEl.disabled = true; btnEl.textContent = "Creating…"; }
 
-  const pinHash = await hashPin(pin);
-  accounts[key] = role === "taxpayer"
-    ? { type:"taxpayer", cnic: normalId, name, pinHash }
-    : { type:"advisor",  username: normalId, name, pinHash };
-  saveAccounts(accounts);
+  try {
+    const cred = await _auth.createUserWithEmailAndPassword(email, _fbPin(pin));
+    const uid  = cred.user.uid;
+    const profile = role === "taxpayer"
+      ? { type:"taxpayer", cnic: normalId, name, createdAt: new Date().toISOString() }
+      : { type:"advisor",  username: normalId, name, createdAt: new Date().toISOString() };
+    await _db.collection("users").doc(uid).set(profile);
 
-  document.getElementById("addClientModal").classList.add("hidden");
-  document.getElementById("createAccountModal").classList.add("hidden");
+    const session = { type: role, id: normalId, name, uid };
+    saveSession(session);
+    document.getElementById("addClientModal").classList.add("hidden");
+    document.getElementById("createAccountModal").classList.add("hidden");
 
-  // Auto-login
-  const session = { type: role, id: normalId, name };
-  saveSession(session);
-  if (role === "advisor") {
-    document.getElementById("loginScreen").classList.add("hidden");
-    showAdvisorDashboard();
-  } else {
-    _enterApp("individual");
-    // Pre-fill CNIC and name
-    const cnicEl = document.getElementById("cnic");
-    const nameEl = document.getElementById("fullName");
-    if (cnicEl) cnicEl.value = normalId;
-    if (nameEl) nameEl.value = name;
+    if (role === "advisor") {
+      document.getElementById("loginScreen").classList.add("hidden");
+      showAdvisorDashboard();
+    } else {
+      _enterApp("individual");
+      const cnicEl = document.getElementById("cnic");
+      const nameEl = document.getElementById("fullName");
+      if (cnicEl) cnicEl.value = normalId;
+      if (nameEl) nameEl.value = name;
+    }
+  } catch(e) {
+    const code = e.code || "";
+    if (code === "auth/email-already-in-use") {
+      errEl.textContent = "An account with this " + (role==="taxpayer"?"CNIC":"email") + " already exists.";
+    } else if (code === "auth/network-request-failed") {
+      errEl.textContent = "No internet connection. Please connect and try again.";
+    } else {
+      errEl.textContent = "Error: " + e.message;
+    }
+  } finally {
+    if (btnEl) { btnEl.disabled = false; btnEl.textContent = "✅ Create Account"; }
   }
 }
 
 function logout() {
-  localStorage.removeItem("gf_session");
+  _auth.signOut();
+  saveSession(null);
   document.getElementById("logoutBtn").classList.add("hidden");
   document.getElementById("backClientsBtn").classList.add("hidden");
-  // Re-init login screen
   document.getElementById("lsId").value = "";
   document.getElementById("lsPin").value = "";
   document.getElementById("lsErr").textContent = "";
@@ -3920,19 +4062,46 @@ function showAdvisorDashboard() {
   renderClientList();
 }
 
-function getAdvisorClients() {
+// Advisor clients — Firestore subcollection with localStorage cache fallback
+async function _getAdvisorClients() {
   const sess = getSession();
   if (!sess) return [];
+  const advisorId = sess.uid || sess.id;
+  try {
+    const snap = await _db.collection("advisors").doc(advisorId).collection("clients").get();
+    if (!snap.empty) {
+      const clients = snap.docs.map(d => d.data());
+      localStorage.setItem("gf_advisor_clients_" + sess.id, JSON.stringify(clients));
+      return clients;
+    }
+  } catch(e) { console.warn("Firestore clients fetch:", e); }
   return JSON.parse(localStorage.getItem("gf_advisor_clients_" + sess.id) || "[]");
 }
-function saveAdvisorClients(arr) {
+async function _saveAdvisorClient(client) {
   const sess = getSession();
   if (!sess) return;
+  const advisorId = sess.uid || sess.id;
+  try {
+    await _db.collection("advisors").doc(advisorId).collection("clients").doc(client.cnic).set(client);
+  } catch(e) { console.warn("Firestore client save:", e); }
+  const arr = JSON.parse(localStorage.getItem("gf_advisor_clients_" + sess.id) || "[]");
+  const idx = arr.findIndex(c => c.cnic === client.cnic);
+  if (idx >= 0) arr[idx] = client; else arr.push(client);
+  localStorage.setItem("gf_advisor_clients_" + sess.id, JSON.stringify(arr));
+}
+async function _deleteAdvisorClient(cnic) {
+  const sess = getSession();
+  if (!sess) return;
+  const advisorId = sess.uid || sess.id;
+  try {
+    await _db.collection("advisors").doc(advisorId).collection("clients").doc(cnic).delete();
+  } catch(e) { console.warn("Firestore client delete:", e); }
+  const arr = JSON.parse(localStorage.getItem("gf_advisor_clients_" + sess.id) || "[]").filter(c => c.cnic !== cnic);
   localStorage.setItem("gf_advisor_clients_" + sess.id, JSON.stringify(arr));
 }
 
-function renderClientList(filter) {
-  const clients = getAdvisorClients();
+async function renderClientList(filter) {
+  const clients = await _getAdvisorClients();
   const q = (filter || document.getElementById("advSearch")?.value || "").toLowerCase();
   const list = q ? clients.filter(c => (c.name+c.cnic+c.ntn).toLowerCase().includes(q)) : clients;
   const el = document.getElementById("advClientList");
@@ -3975,31 +4144,38 @@ function showAddClientModal() {
   document.getElementById("acErr").textContent = "";
 }
 
-function addClient() {
-  const name = (document.getElementById("acName")?.value || "").trim();
-  const cnic = (document.getElementById("acCnic")?.value || "").trim().replace(/[^0-9]/g,"");
-  const ntn  = (document.getElementById("acNtn")?.value  || "").trim();
+async function addClient() {
+  const name  = (document.getElementById("acName")?.value || "").trim();
+  const cnic  = (document.getElementById("acCnic")?.value || "").trim().replace(/[^0-9]/g,"");
+  const ntn   = (document.getElementById("acNtn")?.value  || "").trim();
   const errEl = document.getElementById("acErr");
+  const btnEl = document.querySelector("#addClientModal .ca-submit");
   errEl.textContent = "";
 
   if (!name || !cnic) { errEl.textContent = "Name and CNIC are required."; return; }
   if (cnic.length !== 13) { errEl.textContent = "CNIC must be 13 digits."; return; }
 
-  const clients = getAdvisorClients();
-  if (clients.find(c => c.cnic === cnic)) { errEl.textContent = "A client with this CNIC already exists."; return; }
-
-  clients.push({ cnic, name, ntn, status:"Not Started", createdAt: new Date().toISOString() });
-  saveAdvisorClients(clients);
+  if (btnEl) { btnEl.disabled = true; btnEl.textContent = "Adding…"; }
+  const clients = await _getAdvisorClients();
+  if (clients.find(c => c.cnic === cnic)) {
+    errEl.textContent = "A client with this CNIC already exists.";
+    if (btnEl) { btnEl.disabled = false; btnEl.textContent = "+ Add Client"; }
+    return;
+  }
+  const newClient = { cnic, name, ntn, status:"Not Started", createdAt: new Date().toISOString() };
+  await _saveAdvisorClient(newClient);
+  if (btnEl) { btnEl.disabled = false; btnEl.textContent = "+ Add Client"; }
   document.getElementById("addClientModal").classList.add("hidden");
   renderClientList();
 }
 
-function openClient(cnic) {
-  // Update status to In Progress if Not Started
-  const clients = getAdvisorClients();
+async function openClient(cnic) {
+  const clients = await _getAdvisorClients();
   const c = clients.find(x => x.cnic === cnic);
-  if (c && c.status === "Not Started") { c.status = "In Progress"; saveAdvisorClients(clients); }
-
+  if (c && c.status === "Not Started") {
+    c.status = "In Progress";
+    await _saveAdvisorClient(c);
+  }
   document.getElementById("advisorDashboard").classList.add("hidden");
   document.getElementById("backClientsBtn").classList.remove("hidden");
   document.getElementById("logoutBtn").classList.remove("hidden");
@@ -4007,10 +4183,9 @@ function openClient(cnic) {
   setTimeout(() => loadReturn(cnic), 100);
 }
 
-function deleteClient(cnic) {
+async function deleteClient(cnic) {
   if (!confirm("Delete client " + cnic + "? Their return data will remain but they will be removed from your list.")) return;
-  const clients = getAdvisorClients().filter(c => c.cnic !== cnic);
-  saveAdvisorClients(clients);
+  await _deleteAdvisorClient(cnic);
   renderClientList();
 }
 
@@ -4034,39 +4209,58 @@ function caSetRole(role) {
   document.getElementById("caErr").textContent = "";
 }
 
-// Init AFTER full DOM is ready (role overlay HTML comes after this script tag)
+// Init AFTER full DOM is ready
 document.addEventListener("DOMContentLoaded", function() {
-  const sess = getSession();
-  const accounts = getAccounts();
-
-  if (sess) {
-    if (sess.type === "advisor") {
-      showAdvisorDashboard();
-    } else {
-      // Taxpayer resuming session
-      _enterApp("individual");
-      if (sess.id) setTimeout(() => loadReturn(sess.id), 100);
-    }
+  // Fast path: use cached session for instant UI (avoids white flash on reload)
+  const cachedSess = getSession();
+  if (cachedSess) {
+    if (cachedSess.type === "advisor") showAdvisorDashboard();
+    else { _enterApp("individual"); if (cachedSess.id && cachedSess.id !== "legacy") setTimeout(() => loadReturn(cachedSess.id), 150); }
   } else {
-    // Show login screen
     showLoginScreen();
-    // If no accounts at all, show create-account on first run
-    if (!Object.keys(accounts).length) {
-      // Show the login screen with a first-run hint (handled by HTML)
-    }
-    // Also handle gf_mode for backwards compat (migrating existing users)
-    const legacyMode = localStorage.getItem("gf_mode");
-    if (legacyMode) {
-      // Existing install without login — let them through with a session
-      const autoSess = { type: legacyMode === "advisor" ? "advisor" : "taxpayer", id:"legacy", name:"Returning User" };
-      saveSession(autoSess);
-      if (legacyMode === "advisor") {
-        showAdvisorDashboard();
-      } else {
-        _enterApp(legacyMode);
-      }
-    }
   }
+
+  // Firebase Auth state — authoritative check (fires async, ~100-200ms after page load)
+  _auth.onAuthStateChanged(async function(firebaseUser) {
+    if (firebaseUser) {
+      // Signed in — rebuild session from Firestore profile if needed
+      let sess = getSession();
+      if (!sess || sess.uid !== firebaseUser.uid) {
+        try {
+          const snap = await _db.collection("users").doc(firebaseUser.uid).get();
+          if (snap.exists) {
+            const p = snap.data();
+            sess = { type: p.type, id: p.cnic || p.username, name: p.name, uid: firebaseUser.uid };
+            saveSession(sess);
+          }
+        } catch(e) { console.warn("Profile fetch:", e); }
+      }
+      if (sess && !cachedSess) {
+        // Firebase confirmed login but no cached session — enter app now
+        if (sess.type === "advisor") showAdvisorDashboard();
+        else { _enterApp("individual"); if (sess.id) setTimeout(() => loadReturn(sess.id), 150); }
+      }
+    } else {
+      // Not signed in to Firebase
+      if (!cachedSess) {
+        // Check for legacy gf_mode (users before login system)
+        const legacyMode = localStorage.getItem("gf_mode");
+        if (legacyMode) {
+          const autoSess = { type: legacyMode === "advisor" ? "advisor" : "taxpayer", id:"legacy", name:"Returning User" };
+          saveSession(autoSess);
+          if (legacyMode === "advisor") showAdvisorDashboard();
+          else _enterApp(legacyMode);
+        } else {
+          showLoginScreen();
+        }
+      } else if (navigator.onLine) {
+        // Was cached but Firebase says not logged in — session expired
+        saveSession(null);
+        showLoginScreen();
+      }
+      // If offline + cachedSess → keep current UI (already set by fast path)
+    }
+  });
 });
 
 /* ═══════════════════════════════════════════
