@@ -2310,8 +2310,17 @@ function lsKey(cnic) { return "tr26_" + cnic.replace(/[^0-9]/g,""); }
 async function saveReturn() { showLeadCapture(_saveReturn, 'save'); }
 async function _saveReturn() {
   collectForm();
-  const rawCnic = D.cnic.replace(/[^0-9]/g,"");
+  let rawCnic = D.cnic ? D.cnic.replace(/[^0-9]/g,"") : "";
+  // Fall back to session CNIC if form is empty (e.g. new user hasn't filled personal tab yet)
+  if (!rawCnic || rawCnic.length < 13) {
+    const _sess = getSession();
+    if (_sess?.id && _sess.id.replace(/[^0-9]/g,"").length === 13)
+      rawCnic = _sess.id.replace(/[^0-9]/g,"");
+  }
   if (!rawCnic || rawCnic.length < 13) { toast("Enter a valid 13-digit CNIC first.", true); return; }
+  // Sync CNIC back to form so it sticks
+  const _cnicEl = document.getElementById("cnic");
+  if (_cnicEl && !_cnicEl.value) _cnicEl.value = rawCnic;
   const entry = { cnic: rawCnic, name: D.name, savedAt: new Date().toISOString(), returnData: D };
 
   // 1. Always save to localStorage cache
@@ -3959,7 +3968,14 @@ async function loginUser() {
       showAdvisorDashboard();
     } else {
       _enterApp("individual");
-      if (profile.cnic) setTimeout(() => loadReturn(profile.cnic), 150);
+      // Auto-fill personal tab with CNIC + name from profile
+      setTimeout(() => {
+        const _cEl = document.getElementById("cnic");
+        const _nEl = document.getElementById("name");
+        if (_cEl && !_cEl.value && profile.cnic) _cEl.value = profile.cnic;
+        if (_nEl && !_nEl.value && profile.name) _nEl.value = profile.name;
+      }, 200);
+      if (profile.cnic) setTimeout(() => loadReturn(profile.cnic), 350);
     }
   } catch(e) {
     const code = e.code || "";
@@ -3983,6 +3999,7 @@ async function createAccount() {
   const role   = document.querySelector(".ca-role-btn.active")?.dataset.role || "taxpayer";
   const name   = (document.getElementById("caName")?.value  || "").trim();
   const idVal  = (document.getElementById("caId")?.value    || "").trim();
+  const phone  = (document.getElementById("caPhone")?.value || "").trim();
   const pin    = (document.getElementById("caPin")?.value   || "").trim();
   const pin2   = (document.getElementById("caPin2")?.value  || "").trim();
   const errEl  = document.getElementById("caErr");
@@ -3990,6 +4007,7 @@ async function createAccount() {
   errEl.textContent = "";
 
   if (!name || !idVal || !pin || !pin2) { errEl.textContent = "All fields are required."; return; }
+  if (!phone || phone.replace(/\D/g,"").length < 10) { errEl.textContent = "Enter a valid mobile number."; return; }
   if (pin.length < 4) { errEl.textContent = "PIN must be at least 4 digits."; return; }
   if (pin !== pin2)   { errEl.textContent = "PINs do not match."; return; }
 
@@ -4003,9 +4021,11 @@ async function createAccount() {
     const cred = await _auth.createUserWithEmailAndPassword(email, _fbPin(pin));
     const uid  = cred.user.uid;
     const profile = role === "taxpayer"
-      ? { type:"taxpayer", cnic: normalId, name, createdAt: new Date().toISOString() }
-      : { type:"advisor",  username: normalId, name, createdAt: new Date().toISOString() };
+      ? { type:"taxpayer", cnic: normalId, name, phone, createdAt: new Date().toISOString() }
+      : { type:"advisor",  username: normalId, name, phone, createdAt: new Date().toISOString() };
     await _db.collection("users").doc(uid).set(profile);
+    // Pre-populate lead form with phone so user doesn't have to enter it again
+    localStorage.setItem("gf_lead_data", JSON.stringify({ phone }));
 
     const session = { type: role, id: normalId, name, uid };
     saveSession(session);
@@ -4039,6 +4059,7 @@ async function createAccount() {
 function logout() {
   _auth.signOut();
   saveSession(null);
+  localStorage.removeItem("gf_lead_done");  // reset so next user sees lead popup
   document.getElementById("logoutBtn").classList.add("hidden");
   document.getElementById("backClientsBtn").classList.add("hidden");
   document.getElementById("lsId").value = "";
@@ -5404,6 +5425,10 @@ function calcExtraWht() {
     <div class="ca-field">
       <label id="caIdLabel">CNIC (13 digits)</label>
       <input type="text" id="caId" placeholder="3520212345678" autocomplete="username" inputmode="numeric">
+    </div>
+    <div class="ca-field">
+      <label>Mobile Number (WhatsApp)</label>
+      <input type="tel" id="caPhone" placeholder="+92 300 0000000" autocomplete="tel" inputmode="tel">
     </div>
     <div class="ca-field">
       <label>PIN (4–8 digits)</label>
