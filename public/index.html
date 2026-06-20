@@ -5422,25 +5422,27 @@ function _generatePDF() {
 <!-- ══════════════════════════════════════════
      ADD CLIENT MODAL
      ══════════════════════════════════════════ -->
-<div id="addClientModal" class="hidden" style="position:fixed;inset:0;background:rgba(2,8,24,.85);z-index:4500;display:flex;align-items:center;justify-content:center;padding:20px">
-  <div class="ls-box">
-    <div class="ls-title" style="margin-bottom:4px">Add New Client</div>
-    <div class="ls-sub" style="margin-bottom:16px">Enter client details to begin their return</div>
+<div id="addClientModal" class="hidden">
+  <div class="adv-modal-box">
+    <div class="adv-modal-title">Add New Client</div>
+    <div class="adv-modal-sub">Enter client details to begin their return</div>
     <div class="ca-field">
       <label>Full Name</label>
-      <input type="text" id="clientName" placeholder="Client full name" autocomplete="off">
+      <input type="text" id="acName" placeholder="Client full name" autocomplete="off">
     </div>
     <div class="ca-field">
       <label>CNIC (13 digits)</label>
-      <input type="text" id="clientCnic" placeholder="3520212345678" inputmode="numeric" maxlength="13" autocomplete="off">
+      <input type="text" id="acCnic" placeholder="3520212345678" inputmode="numeric" maxlength="13" autocomplete="off">
     </div>
     <div class="ca-field">
       <label>NTN (optional)</label>
-      <input type="text" id="clientNtn" placeholder="NTN Number" autocomplete="off">
+      <input type="text" id="acNtn" placeholder="NTN Number" autocomplete="off">
     </div>
-    <div id="addClientErr" style="color:#f87171;font-size:12px;min-height:16px;margin-bottom:4px"></div>
-    <button class="ls-btn" onclick="saveNewClient()">Add Client →</button>
-    <div class="ls-link"><a href="#" onclick="hideAddClientModal();return false">← Cancel</a></div>
+    <div id="acErr" style="color:#f87171;font-size:12px;min-height:16px;margin-bottom:8px"></div>
+    <div class="adv-modal-actions">
+      <button class="ca-cancel" onclick="document.getElementById('addClientModal').classList.add('hidden')">Cancel</button>
+      <button class="ca-submit" onclick="addClient()">+ Add Client</button>
+    </div>
   </div>
 </div>
 
