@@ -677,7 +677,7 @@ input[type=range].ps::-moz-range-thumb{width:18px;height:18px;border-radius:50%;
   <div class="spacer"></div>
   <button id="backClientsBtn" class="hidden" onclick="showAdvisorDashboard()" style="background:rgba(139,92,246,.2);color:#c4b5fd;border:1px solid rgba(139,92,246,.35);padding:7px 14px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600">◀ Clients</button>
   <button id="saveBtn">💾 Save Return</button>
-  <span id="modeBadge" onclick="showRolePicker()" title="Switch mode"></span>
+  <span id="modeBadge" onclick="logout()" title="Logout to switch role"></span>
   <button id="logoutBtn" class="hidden" onclick="logout()" style="background:rgba(239,68,68,.15);color:#f87171;border:1px solid rgba(239,68,68,.25);padding:7px 14px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600">🔓 Logout</button>
 </header>
 
@@ -689,12 +689,12 @@ input[type=range].ps::-moz-range-thumb{width:18px;height:18px;border-radius:50%;
     <div class="nav-item" data-tab="deductions">       <span class="icon">🔖</span><span>Deductions</span></div>
     <div class="nav-item" data-tab="wealth">           <span class="icon">🏦</span><span>Wealth</span></div>
     <div class="nav-item" data-tab="summary">          <span class="icon">📊</span><span>Summary</span></div>
+    <div class="nav-item advisor-only" data-tab="advisor-tools"><span class="icon">⚖️</span><span>Adv. Tools</span></div>
     <div class="nav-item" data-tab="filer">            <span class="icon">✅</span><span>Filer Check</span></div>
     <div class="nav-item" data-tab="planner">          <span class="icon">📐</span><span>Tax Planner</span></div>
     <div class="nav-item" data-tab="chat">             <span class="icon">💬</span><span>Tax Advisor</span></div>
     <div class="nav-item" data-tab="iris">             <span class="icon">📋</span><span>IRIS 114</span></div>
     <div class="nav-item" data-tab="bank">             <span class="icon">🏦</span><span>Bank Import</span></div>
-    <div class="nav-item advisor-only" data-tab="advisor-tools"><span class="icon">⚖️</span><span>Adv. Tools</span></div>
     <div style="flex:1"></div>
     <div class="nav-item" data-tab="saved">            <span class="icon">📁</span><span>Saved</span></div>
   </nav>
@@ -5293,136 +5293,33 @@ function _generatePDF() {
     ],
     body: paidRows,
     foot: [[ { content: "Total Tax Paid / Adjustable", styles: { fontStyle:"bold" } },
-             { content: "Rs " + fmt(c.totalTaxPaid), styles: { halign:"right", fontStyle:"bold", textColor: MID_BLUE } } ]],
-    footStyles: { fillColor: LIGHT_BLUE }
-  });
-  y = doc.lastAutoTable.finalY + 6;
-
-  // ── BALANCE BOX ──
-  const isPayable = c.balance > 0;
-  const isRefund  = c.balance < 0;
-  const balFill   = isPayable ? RED : isRefund ? GREEN : MID_BLUE;
-  const balLabel  = isPayable ? "TAX PAYABLE" : isRefund ? "TAX REFUND" : "BALANCED — NO TAX DUE";
-  const balAmt    = "Rs " + fmt(Math.abs(c.balance));
-
-  // Check if we need a new page for the balance box
-  if (y > PH - 50) { doc.addPage(); y = 15; }
-
-  doc.setFillColor(...balFill);
-  doc.roundedRect(ML, y, TW, 22, 2, 2, "F");
-  doc.setTextColor(...WHITE);
-  doc.setFontSize(10);
-  doc.setFont("helvetica", "bold");
-  doc.text(balLabel, PW / 2, y + 8, { align: "center" });
-  doc.setFontSize(18);
-  doc.text(balAmt, PW / 2, y + 17, { align: "center" });
-  y += 28;
-
-  // ── WEALTH STATEMENT ──
-  sectionTitle("Wealth Statement Reconciliation");
-  const wealthRows = [
-    { item: "Opening Net Assets (01 Jul 2025)",  val: "Rs " + fmt(D.openingNetAssets) },
-    { item: "Closing Net Assets (30 Jun 2026)",  val: "Rs " + fmt(c.closingNetAssets) },
-    { item: "Increase in Net Assets",            val: "Rs " + fmt(c.increaseInNetAssets) },
-    { item: "Total Inflows (income + receipts)", val: "Rs " + fmt(c.inflows) },
-    { item: "Total Outflows (expenses + tax)",   val: "Rs " + fmt(c.outflows) },
-  ];
-  const uncRec = c.unreconciled === 0
-    ? { item: "Reconciliation", val: "✓ Balanced" }
-    : { item: "Unreconciled Difference", val: "Rs " + fmt(c.unreconciled) };
-
-  doc.autoTable({
-    startY: y,
-    margin: { left: ML, right: MR },
-    theme: "plain",
-    styles: { fontSize: 9, cellPadding: { top: 2.5, bottom: 2.5, left: 3, right: 3 }, textColor: BLACK },
-    headStyles: { fillColor: LIGHT_BLUE, textColor: MID_BLUE, fontStyle: "bold" },
-    alternateRowStyles: { fillColor: GREY_BG },
-    columnStyles: { val: { halign: "right" } },
-    columns: [
-      { dataKey: "item", header: "Item" },
-      { dataKey: "val",  header: "Amount" }
-    ],
-    body: wealthRows,
-    foot: [[
-      { content: uncRec.item, styles: { fontStyle:"bold" } },
-      { content: uncRec.val,  styles: { halign:"right", fontStyle:"bold",
-          textColor: c.unreconciled === 0 ? GREEN : RED } }
-    ]],
+             { content: "Rs " + fmt(c.totalTaxPaid), styles: { halign:"right", fontStyle:"bold", textColor: GREEN } } ]],
     footStyles: { fillColor: LIGHT_BLUE }
   });
   y = doc.lastAutoTable.finalY + 5;
 
-  // ── WARNINGS ──
-  if (c.warnings.length > 0) {
-    if (y > PH - 40) { doc.addPage(); y = 15; }
-    sectionTitle("Warnings & Advisories");
-    doc.setFillColor(254, 243, 199);
-    doc.roundedRect(ML, y - 2, TW, c.warnings.length * 9 + 6, 2, 2, "F");
-    doc.setFontSize(8.5);
-    doc.setTextColor(146, 64, 14);
-    doc.setFont("helvetica", "normal");
-    c.warnings.forEach((w, i) => {
-      const lines = doc.splitTextToSize("⚠  " + w, TW - 6);
-      lines.forEach((line, li) => {
-        doc.text(line, ML + 3, y + (i * 9) + (li * 5) + 3);
-      });
-    });
-    y += c.warnings.length * 9 + 8;
-  }
+  // ── NET BALANCE ──
+  sectionTitle("Net Tax Position");
+  const isRefund = c.balance < 0;
+  doc.setFillColor(...(isRefund ? GREEN : RED));
+  doc.roundedRect(ML, y, TW, 14, 2, 2, "F");
+  doc.setFontSize(11);
+  doc.setTextColor(...WHITE);
+  doc.setFont("helvetica", "bold");
+  const balLabel2 = isRefund ? "TAX REFUND DUE" : "TAX BALANCE DUE";
+  const balAmt2   = "Rs " + fmt(Math.abs(c.balance));
+  doc.text(balLabel2, ML + 6, y + 8.5);
+  doc.text(balAmt2, PW - MR - 6, y + 8.5, { align: "right" });
+  y += 18;
 
-  // ── FOOTER on every page ──
-  const totalPages = doc.getNumberOfPages();
-  for (let p = 1; p <= totalPages; p++) {
-    doc.setPage(p);
-    // Divider
-    doc.setDrawColor(203, 213, 225);
-    doc.line(ML, PH - 16, PW - MR, PH - 16);
-    // Left: disclaimer
-    doc.setFontSize(7);
-    doc.setTextColor(...GREY_TEXT);
-    doc.setFont("helvetica", "italic");
-    doc.text("This document is generated by GoFiler for record-keeping purposes only and does not constitute an official FBR submission.", ML, PH - 11);
-    doc.text("Verify your tax return with a registered tax practitioner.", ML, PH - 7);
-    // Right: page number
-    doc.setFont("helvetica", "normal");
-    doc.text(`Page ${p} of ${totalPages}`, PW - MR, PH - 9, { align: "right" });
-  }
+  // ── FOOTER ──
+  doc.setFontSize(7.5);
+  doc.setTextColor(...GREY_TEXT);
+  doc.setFont("helvetica", "normal");
+  doc.text("AI-generated summary for reference only. Not a substitute for official FBR filing. Figures based on Finance Act 2025.", ML, PH - 8);
+  doc.text("GoFiler — gofiler.vercel.app", PW - MR, PH - 8, { align: "right" });
 
-  // ── SAVE ──
-  const safeCnic = (D.cnic || "unknown").replace(/[^0-9]/g,"");
-  doc.save(`GoFiler-TaxReturn-${safeCnic}-TY2026.pdf`);
-  toast("PDF downloaded successfully!");
-}
-
-/* ─── Extra WHT Calculator ─── */
-function calcExtraWht() {
-  const n = id => +document.getElementById(id).value || 0;
-  const bankProfit    = n("calcBankProfit");
-  const dividend      = n("calcDividend");
-  const propPurchase  = n("calcPropPurchase");
-  const propSale      = n("calcPropSale");
-  const services      = n("calcServices");
-  const cash          = n("calcCash");
-
-  // Extra WHT = (non-filer rate - filer rate) * amount
-  const extra =
-    bankProfit   * 0.15 +   // 30% - 15%
-    dividend     * 0.15 +   // 30% - 15%
-    propPurchase * 0.03 +   // 6% - 3%
-    propSale     * 0.03 +   // 6% - 3%
-    services     * 0.10 +   // 20% - 10%
-    cash         * 0.006;   // 0.6% - 0%
-
-  const resultDiv = document.getElementById("extraWhtResult");
-  const amountEl  = document.getElementById("extraWhtAmount");
-
-  if (extra > 0) {
-    amountEl.textContent  = "Rs " + Math.round(extra).toLocaleString("en-PK");
-    resultDiv.style.display = "block";
-  } else {
-    resultDiv.style.display = "none";
-  }
+  doc.save("GoFiler_TaxReturn_" + (D.cnic || "TY2026") + ".pdf");
 }
 </script>
 
@@ -5448,57 +5345,44 @@ function calcExtraWht() {
     </div>
     <div class="ls-field">
       <label>PIN</label>
-      <input type="password" id="lsPin" placeholder="Enter your PIN" autocomplete="current-password" inputmode="numeric" maxlength="8" onkeydown="if(event.key==='Enter')loginUser()">
+      <input type="password" id="lsPin" placeholder="Your PIN" autocomplete="current-password">
     </div>
-
-    <button class="ls-btn" onclick="loginUser()">Login →</button>
-    <div class="ls-err" id="lsErr"></div>
-
-    <div class="ls-link">
-      Don't have an account? <a onclick="document.getElementById('createAccountModal').classList.remove('hidden');caSetRole('taxpayer')">Create Account</a>
-    </div>
+    <div id="lsErr" style="color:#f87171;font-size:12px;min-height:16px;margin-bottom:4px"></div>
+    <button class="ls-btn" onclick="loginUser()">Sign In →</button>
+    <div class="ls-link">New to GoFiler? <a href="#" onclick="document.getElementById('createAccountModal').classList.remove('hidden');return false">Create Account</a></div>
   </div>
 </div>
 
 <!-- ══════════════════════════════════════════
      CREATE ACCOUNT MODAL
      ══════════════════════════════════════════ -->
-<div id="createAccountModal" class="hidden">
-  <div class="ca-box">
-    <div class="ca-title">Create Account</div>
-    <div class="ca-sub">Your data stays on your device — no server required.</div>
-
+<div id="createAccountModal" class="hidden" style="position:fixed;inset:0;background:rgba(2,8,24,.85);z-index:4000;display:flex;align-items:center;justify-content:center;padding:20px">
+  <div class="ls-box" style="max-height:90vh;overflow-y:auto">
+    <div class="ls-title" style="margin-bottom:4px">Create Account</div>
+    <div class="ls-sub" style="margin-bottom:16px">GoFiler — Tax Year 2026</div>
     <div class="ca-role-toggle">
       <button class="ca-role-btn active" data-role="taxpayer" onclick="caSetRole('taxpayer')">👤 Taxpayer</button>
       <button class="ca-role-btn" data-role="advisor" onclick="caSetRole('advisor')">⚖️ Tax Advisor</button>
     </div>
-
     <div class="ca-field">
       <label>Full Name</label>
-      <input type="text" id="caName" placeholder="Muhammad Ali" autocomplete="name">
+      <input type="text" id="caName" placeholder="As per CNIC" autocomplete="name">
     </div>
     <div class="ca-field">
       <label id="caIdLabel">CNIC (13 digits)</label>
-      <input type="text" id="caId" placeholder="3520212345678" autocomplete="username" inputmode="numeric">
+      <input type="text" id="caId" placeholder="3520212345678" autocomplete="username" inputmode="numeric" maxlength="13">
     </div>
     <div class="ca-field">
       <label>Mobile Number (WhatsApp)</label>
       <input type="tel" id="caPhone" placeholder="+92 300 0000000" autocomplete="tel" inputmode="tel">
     </div>
     <div class="ca-field">
-      <label>PIN (4–8 digits)</label>
-      <input type="password" id="caPin" placeholder="Choose a PIN" autocomplete="new-password" inputmode="numeric" maxlength="8">
+      <label>PIN (minimum 6 characters)</label>
+      <input type="password" id="caPin" placeholder="Choose a PIN" autocomplete="new-password">
     </div>
-    <div class="ca-field">
-      <label>Confirm PIN</label>
-      <input type="password" id="caPin2" placeholder="Repeat PIN" autocomplete="new-password" inputmode="numeric" maxlength="8" onkeydown="if(event.key==='Enter')createAccount()">
-    </div>
-
-    <div class="ca-err" id="caErr"></div>
-    <div class="ca-actions">
-      <button class="ca-cancel" onclick="document.getElementById('createAccountModal').classList.add('hidden')">Cancel</button>
-      <button class="ca-submit" onclick="createAccount()">✅ Create Account</button>
-    </div>
+    <div id="caErr" style="color:#f87171;font-size:12px;min-height:16px;margin-bottom:4px"></div>
+    <button class="ls-btn" onclick="createAccount()">Create Account →</button>
+    <div class="ls-link"><a href="#" onclick="document.getElementById('createAccountModal').classList.add('hidden');return false">← Back to Sign In</a></div>
   </div>
 </div>
 
@@ -5529,17 +5413,88 @@ function calcExtraWht() {
 <!-- ══════════════════════════════════════════
      ADD CLIENT MODAL
      ══════════════════════════════════════════ -->
-<div id="addClientModal" class="hidden">
-  <div class="ca-box">
-    <div class="ca-title">Add New Client</div>
-    <div class="ca-sub">Client data is stored locally on this device.</div>
-
+<div id="addClientModal" class="hidden" style="position:fixed;inset:0;background:rgba(2,8,24,.85);z-index:4500;display:flex;align-items:center;justify-content:center;padding:20px">
+  <div class="ls-box">
+    <div class="ls-title" style="margin-bottom:4px">Add New Client</div>
+    <div class="ls-sub" style="margin-bottom:16px">Enter client details to begin their return</div>
     <div class="ca-field">
       <label>Full Name</label>
-      <input type="text" id="acName" placeholder="Client's full name" autocomplete="off">
+      <input type="text" id="clientName" placeholder="Client full name" autocomplete="off">
     </div>
     <div class="ca-field">
       <label>CNIC (13 digits)</label>
+      <input type="text" id="clientCnic" placeholder="3520212345678" inputmode="numeric" maxlength="13" autocomplete="off">
+    </div>
+    <div class="ca-field">
+      <label>NTN (optional)</label>
+      <input type="text" id="clientNtn" placeholder="NTN Number" autocomplete="off">
+    </div>
+    <div id="addClientErr" style="color:#f87171;font-size:12px;min-height:16px;margin-bottom:4px"></div>
+    <button class="ls-btn" onclick="saveNewClient()">Add Client →</button>
+    <div class="ls-link"><a href="#" onclick="hideAddClientModal();return false">← Cancel</a></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     ROLE OVERLAY
+     ══════════════════════════════════════════ -->
+<div id="roleOverlay" class="hidden">
+  <div class="role-logo">
+    <div class="role-logo-mark">GF</div>
+    <div><h2>GoFiler</h2><span>Pakistan Income Tax Return — Tax Year 2026</span></div>
+  </div>
+  <p class="role-tagline">Before we begin, tell us who you are so we can tailor the experience for you.</p>
+  <div class="role-cards">
+    <div class="role-card individual" tabindex="0" onclick="setMode('individual')" onkeydown="if(event.key==='Enter'||event.key===' ')setMode('individual')">
+      <span class="rc-icon">👤</span>
+      <div class="rc-title">Individual Filer</div>
+      <div class="rc-desc">I'm filing my own income tax return. Show me a clean, simple interface with guided help at every step.</div>
+      <span class="rc-badge">Simplified View</span>
+    </div>
+    <div class="role-card advisor" tabindex="0" onclick="setMode('advisor')" onkeydown="if(event.key==='Enter'||event.key===' ')setMode('advisor')">
+      <span class="rc-icon">⚖️</span>
+      <div class="rc-title">Tax Advisor</div>
+      <div class="rc-desc">I manage returns for multiple clients. Show me the full advisor toolkit and client dashboard.</div>
+      <span class="rc-badge">Advisor Mode</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     LEAD CAPTURE OVERLAY
+     ══════════════════════════════════════════ -->
+<div id="leadOverlay">
+  <div class="lead-box">
+    <div class="lead-header">
+      <div style="font-size:28px;margin-bottom:8px">🎯</div>
+      <div style="font-size:17px;font-weight:800;color:#f1f5f9;margin-bottom:6px">One quick step!</div>
+      <div style="font-size:12px;color:#94a3b8;line-height:1.6">Enter your details to continue — we'll send you tax reminders &amp; updates on WhatsApp.</div>
+    </div>
+    <div class="lead-field">
+      <label>Email Address</label>
+      <input type="email" id="leadEmail" placeholder="you@email.com" autocomplete="email">
+    </div>
+    <div class="lead-field">
+      <label>WhatsApp Number</label>
+      <input type="tel" id="leadPhone" placeholder="+92 300 0000000" autocomplete="tel">
+    </div>
+    <div class="lead-field">
+      <label>Full Name</label>
+      <input type="text" id="leadName" placeholder="Your name" autocomplete="name">
+    </div>
+    <div class="lead-field">
+      <label>CNIC (optional)</label>
+      <input type="text" id="leadCnic" placeholder="13-digit CNIC" inputmode="numeric" maxlength="13">
+    </div>
+    <div id="leadErr" style="color:#f87171;font-size:12px;min-height:14px;margin-bottom:8px"></div>
+    <button class="lead-btn" onclick="leadSubmit()">Continue →</button>
+    <div class="lead-skip"><a href="#" onclick="leadSkip();return false">Skip for now</a></div>
+  </div>
+</div>
+
+</body>
+</html>
+bel>
       <input type="text" id="acCnic" placeholder="3520212345678" inputmode="numeric" maxlength="13">
     </div>
     <div class="ca-field">
