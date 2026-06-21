@@ -2669,19 +2669,13 @@ if ("serviceWorker" in navigator) {
         reg.addEventListener("updatefound", () => {
           const newSW = reg.installing;
           newSW.addEventListener("statechange", () => {
-            if (newSW.state === "activated") {
-              // New SW took over — reload to serve fresh files
-              window.location.reload();
+            if (newSW.state === "installed" && navigator.serviceWorker.controller) {
+              toast("App updated! Refresh the page to get the latest version.");
             }
           });
         });
       })
       .catch(err => console.warn("SW registration failed:", err));
-
-    // Also reload if a different SW takes control mid-session
-    navigator.serviceWorker.addEventListener("controllerchange", () => {
-      window.location.reload();
-    });
   });
 }
 
