@@ -2665,16 +2665,34 @@ function printSummary() { window.print(); }
 
 /* Register service worker */
 if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
+  window.addEventListener("load", async () => {
+    // Self-healing: if stuck on a very old cache (pre-v21), clear everything and reload
+    const cacheNames = await caches.keys();
+    const oldCaches = cacheNames.filter(n => {
+      const m = n.match(/gofiler-v(\d+)/);
+      return m && parseInt(m[1]) < 21;
+    });
+    if (oldCaches.length) {
+      console.log("GoFiler: old SW cache detected, clearing and reloading...");
+      await Promise.all([
+        ...oldCaches.map(n => caches.delete(n)),
+        ...(await navigator.serviceWorker.getRegistrations()).map(r => r.unregister())
+      ]);
+      window.location.reload();
+      return;
+    }
+
     navigator.serviceWorker.register("/sw.js")
       .then(reg => {
         console.log("GoFiler SW registered:", reg.scope);
-        // Auto-reload when a new SW version activates
+        reg.update(); // Always check for a newer SW on load
         reg.addEventListener("updatefound", () => {
           const newSW = reg.installing;
           newSW.addEventListener("statechange", () => {
             if (newSW.state === "installed" && navigator.serviceWorker.controller) {
-              toast("App updated! Refresh the page to get the latest version.");
+              // New SW ready — skip waiting and reload automatically
+              newSW.postMessage({ type: "SKIP_WAITING" });
+              window.location.reload();
             }
           });
         });
