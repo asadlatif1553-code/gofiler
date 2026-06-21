@@ -398,6 +398,12 @@ body[data-mode="advisor"] .nav-item.advisor-only{display:flex}
 .wealth-del:hover{background:rgba(239,68,68,.25)}
 .wealth-subtotal{text-align:right;font-size:12px;font-weight:700;color:var(--accent2);padding:8px 0 2px;border-top:1px solid rgba(255,255,255,.08);margin-top:4px}
 .wealth-empty{text-align:center;color:var(--muted);font-size:12px;padding:14px;font-style:italic}
+/* Property multi-entry */
+.prop-row{display:grid;grid-template-columns:1.4fr 80px 1fr 1fr auto;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.prop-row:last-child{border-bottom:none}
+.prop-hdr{display:grid;grid-template-columns:1.4fr 80px 1fr 1fr auto;gap:8px;padding:0 0 6px;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;border-bottom:1px solid var(--border);margin-bottom:4px}
+.prop-empty{text-align:center;color:var(--muted);font-size:12px;padding:14px;font-style:italic}
+.prop-total{text-align:right;font-size:12px;font-weight:700;color:var(--accent2);padding:8px 0 2px;border-top:1px solid rgba(255,255,255,.08);margin-top:4px}
 /* Depreciation table */
 .dep-hdr{display:grid;grid-template-columns:150px 1fr 100px 100px 46px 100px 1fr auto;gap:6px;padding:7px 4px 10px;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.3px;min-width:750px;border-bottom:1px solid var(--border);text-transform:uppercase}
 .dep-row{display:grid;grid-template-columns:150px 1fr 100px 100px 46px 100px 1fr auto;gap:6px;align-items:center;padding:7px 4px;border-bottom:1px solid rgba(255,255,255,.04);min-width:750px}
@@ -847,16 +853,16 @@ input[type=range].ps::-moz-range-thumb{width:18px;height:18px;border-radius:50%;
       <!-- CAPITAL GAINS -->
       <div class="card hidden" id="sec-capital">
         <div class="card-title">📈 Capital Gains <span style="font-size:11px;color:var(--muted)">Section 37/37A</span></div>
-        <div class="section-sep" style="margin-top:0;padding-top:0;border:none"><div class="section-label">Immovable Property</div></div>
-        <div class="form-grid">
-          <div class="field"><label>Property Type</label>
-            <select id="propertyType">
-              <option>Open Plot</option><option>Built Residential</option><option>Built Commercial</option>
-            </select>
+        <div class="section-sep" style="margin-top:0;padding-top:0;border:none">
+          <div class="section-label">Immovable Properties</div>
+          <button class="wealth-add-btn" onclick="addPropertyRow()">+ Add Property</button>
+        </div>
+        <div class="section-sep" style="border:none;margin:0;padding:0">
+          <div class="prop-hdr">
+            <span>Property Type</span><span>Held (yrs)</span><span>Capital Gain (Rs)</span><span>WHT 236C (Rs)</span><span></span>
           </div>
-          <div class="field"><label>Holding Period (full years)</label><input type="number" id="propertyHoldingYears" min="0" max="30" placeholder="0"/></div>
-          <div class="field"><label>Capital Gain Amount</label><input type="number" id="propertyGainAmount" min="0" placeholder="0"/></div>
-          <div class="field"><label>WHT u/s 236C (property)</label><input type="number" id="taxDeductedCapitalGains" min="0" placeholder="0"/></div>
+          <div id="propList"></div>
+          <div class="prop-total" id="propTotalLine" style="display:none"></div>
         </div>
         <div class="section-sep"><div class="section-label">Listed Securities (Section 37A)</div></div>
         <div class="form-grid">
@@ -1900,16 +1906,22 @@ function computeLocal(rawD) {
     ? _round(d.profitOnDebtBank * 0.20 + d.profitOnDebtNss * 0.15) : 0;
   const finalTaxDividend     = d.hasOtherSources ? _round(d.dividend * 0.15) : 0;
 
-  const pgr = _propGainRate(d.propertyHoldingYears, d.propertyType);
-  const finalTaxCapGainProp  = d.hasCapitalGains ? _round(d.propertyGainAmount * pgr) : 0;
+  // Multi-property capital gains: compute per property using individual holding period
+  const propList = (d.propertyList && d.propertyList.length > 0)
+    ? d.propertyList
+    : (d.propertyGainAmount > 0 ? [{type:d.propertyType||"Open Plot", years:d.propertyHoldingYears||0, gain:d.propertyGainAmount||0}] : []);
+  const finalTaxCapGainProp = d.hasCapitalGains
+    ? propList.reduce((s,p) => s + _round(p.gain * _propGainRate(p.years, p.type)), 0) : 0;
   const finalTaxCapGainSec   = d.hasCapitalGains
     ? _round(d.securitiesGainLessThan1Yr * 0.15 + d.securitiesGain1To2Yr * 0.125) : 0;
   const finalTaxCapitalGains = finalTaxCapGainProp + finalTaxCapGainSec;
 
   if (d.hasCapitalGains && d.securitiesGainAbove2Yr > 0)
     w.push(`Securities gains held >2 years: exempt (Rs ${_fmt(d.securitiesGainAbove2Yr)} excluded).`);
-  if (d.hasCapitalGains && pgr === 0 && d.propertyGainAmount > 0)
-    w.push(`Property held ${d.propertyHoldingYears}+ years: gain exempt (Rs ${_fmt(d.propertyGainAmount)} excluded).`);
+  propList.forEach(p => {
+    if (d.hasCapitalGains && _propGainRate(p.years, p.type) === 0 && p.gain > 0)
+      w.push(`${p.type} held ${p.years}+ years: gain exempt (Rs ${_fmt(p.gain)} excluded).`);
+  });
 
   const totalTaxChargeable = normalTaxNet + finalTaxProfitOnDebt + finalTaxDividend + finalTaxCapitalGains;
 
@@ -2121,11 +2133,15 @@ function collectForm() {
   D.propertyMaintenance = n("propertyMaintenance"); D.propertyInterestOnLoan = n("propertyInterestOnLoan");
   D.propertyOtherDeductions = n("propertyOtherDeductions"); D.taxDeductedRent = n("taxDeductedRent");
 
-  D.propertyType = s("propertyType"); D.propertyHoldingYears = n("propertyHoldingYears");
-  D.propertyGainAmount = n("propertyGainAmount");
+  // Multi-property list (replaces single propertyType/propertyGainAmount fields)
+  D.propertyList = propertyList.map(p => ({type:p.type, years:p.years||0, gain:p.gain||0, wht:p.wht||0}));
+  D.propertyGainAmount = D.propertyList.reduce((s,p) => s + p.gain, 0);
+  D.taxDeductedCapitalGains = D.propertyList.reduce((s,p) => s + p.wht, 0);
+  // Legacy fields kept for backward compat
+  D.propertyType = D.propertyList[0]?.type || "Open Plot";
+  D.propertyHoldingYears = D.propertyList[0]?.years || 0;
   D.securitiesGainLessThan1Yr = n("securitiesGainLessThan1Yr");
   D.securitiesGain1To2Yr = n("securitiesGain1To2Yr"); D.securitiesGainAbove2Yr = n("securitiesGainAbove2Yr");
-  D.taxDeductedCapitalGains = n("taxDeductedCapitalGains");
 
   D.profitOnDebtBank = n("profitOnDebtBank"); D.profitOnDebtNss = n("profitOnDebtNss");
   D.taxDeductedProfit = n("taxDeductedProfit"); D.dividend = n("dividend");
@@ -2193,11 +2209,18 @@ function populateForm(data) {
   sv("propertyMaintenance", D.propertyMaintenance); sv("propertyInterestOnLoan", D.propertyInterestOnLoan);
   sv("propertyOtherDeductions", D.propertyOtherDeductions); sv("taxDeductedRent", D.taxDeductedRent);
 
-  ss("propertyType", D.propertyType); sv("propertyHoldingYears", D.propertyHoldingYears);
-  sv("propertyGainAmount", D.propertyGainAmount);
+  // Restore multi-property list
+  if (D.propertyList && D.propertyList.length > 0) {
+    propertyList = D.propertyList.map((p,i) => ({id: ++_propId, type:p.type||"Open Plot", years:p.years||0, gain:p.gain||0, wht:p.wht||0}));
+  } else if (D.propertyGainAmount > 0) {
+    // Migrate from legacy single-property fields
+    propertyList = [{id: ++_propId, type:D.propertyType||"Open Plot", years:D.propertyHoldingYears||0, gain:D.propertyGainAmount||0, wht:D.taxDeductedCapitalGains||0}];
+  } else {
+    propertyList = [];
+  }
+  renderPropertyList();
   sv("securitiesGainLessThan1Yr", D.securitiesGainLessThan1Yr);
   sv("securitiesGain1To2Yr", D.securitiesGain1To2Yr); sv("securitiesGainAbove2Yr", D.securitiesGainAbove2Yr);
-  sv("taxDeductedCapitalGains", D.taxDeductedCapitalGains);
 
   sv("profitOnDebtBank", D.profitOnDebtBank); sv("profitOnDebtNss", D.profitOnDebtNss);
   sv("taxDeductedProfit", D.taxDeductedProfit); sv("dividend", D.dividend);
@@ -3534,12 +3557,19 @@ function generateIRIS() {
   if (D.hasCapitalGains) {
     let cgRows = "";
     cgRows += subhdr("Immovable Property — Section 37(1A)");
-    if (D.propertyGainAmount > 0) {
-      const pgr = _propGainRate ? _propGainRate(D.propertyHoldingYears, D.propertyType) : 0;
-      cgRows += row("6001",  "Property Type",                                    txt(D.propertyType));
-      cgRows += row("6002",  "Holding Period (years)",                            D.propertyHoldingYears > 0 ? D.propertyHoldingYears + " years" : null);
-      cgRows += row("6003",  "Capital Gain Amount (Consideration – Cost)",        rs(D.propertyGainAmount), true);
-      cgRows += row("6004",  "Applicable Rate (based on holding period)",         pct(pgr));
+    const _pl = (D.propertyList && D.propertyList.length > 0)
+      ? D.propertyList
+      : (D.propertyGainAmount > 0 ? [{type:D.propertyType||"Open Plot", years:D.propertyHoldingYears||0, gain:D.propertyGainAmount||0, wht:D.taxDeductedCapitalGains||0}] : []);
+    if (_pl.length > 0) {
+      _pl.forEach((p, i) => {
+        const pgr = _propGainRate ? _propGainRate(p.years, p.type) : 0;
+        cgRows += subhdr(`Property ${i+1}: ${p.type}`);
+        cgRows += row("6001",  "Property Type",                                    txt(p.type));
+        cgRows += row("6002",  "Holding Period (years)",                            p.years > 0 ? p.years + " years" : null);
+        cgRows += row("6003",  "Capital Gain (Consideration – Cost)",              rs(p.gain), true);
+        cgRows += row("6004",  "Applicable Rate",                                  pct(pgr));
+      });
+      cgRows += row("6005",  "Total Property Gain",                               rs(_pl.reduce((s,p)=>s+p.gain,0)), true);
     }
     cgRows += subhdr("Listed Securities — Section 37A");
     cgRows += row("64220157", "Securities Gain — Held < 1 Year @ 15%",           rs(D.securitiesGainLessThan1Yr));
@@ -4256,7 +4286,18 @@ async function openClient(cnic) {
   document.getElementById("backClientsBtn").classList.remove("hidden");
   document.getElementById("logoutBtn").classList.remove("hidden");
   _enterApp("advisor");
-  setTimeout(() => loadReturn(cnic), 100);
+  setTimeout(() => {
+    loadReturn(cnic);
+    // Pre-fill Personal tab from client record (only if fields are empty after load)
+    if (c) setTimeout(() => {
+      const nameEl = document.getElementById("name") || document.getElementById("fullName");
+      const cnicEl = document.getElementById("cnic");
+      const ntnEl  = document.getElementById("ntn");
+      if (nameEl && !nameEl.value && c.name) nameEl.value = c.name;
+      if (cnicEl && !cnicEl.value && c.cnic) cnicEl.value = c.cnic;
+      if (ntnEl  && !ntnEl.value  && c.ntn)  ntnEl.value  = c.ntn;
+    }, 400);
+  }, 100);
 }
 
 async function deleteClient(cnic) {
@@ -4348,6 +4389,60 @@ document.addEventListener("DOMContentLoaded", function() {
    ADVISOR CALCULATORS
    ═══════════════════════════════════════════*/
 function fmtRs(n) { return "Rs " + Number(n||0).toLocaleString("en-PK"); }
+
+/* ═══════════════════════════════════════════════
+   CAPITAL GAINS — Multi-property entries
+   ═══════════════════════════════════════════════ */
+let _propId = 0;
+let propertyList = [];   // [{id, type, years, gain, wht}]
+
+function _propRow(p) {
+  return `<div class="prop-row" id="prow-${p.id}">
+    <select class="wealth-inp-sel" onchange="updatePropertyRow(${p.id},'type',this.value)">
+      <option${p.type==='Open Plot'?' selected':''}>Open Plot</option>
+      <option${p.type==='Built Residential'?' selected':''}>Built Residential</option>
+      <option${p.type==='Built Commercial'?' selected':''}>Built Commercial</option>
+    </select>
+    <input class="wealth-inp" type="number" min="0" max="30" placeholder="0" value="${p.years||''}" onchange="updatePropertyRow(${p.id},'years',+this.value)">
+    <input class="wealth-inp" type="number" min="0" placeholder="0" value="${p.gain||''}" oninput="updatePropertyRow(${p.id},'gain',+this.value)">
+    <input class="wealth-inp" type="number" min="0" placeholder="0" value="${p.wht||''}" oninput="updatePropertyRow(${p.id},'wht',+this.value)">
+    <button class="wealth-del" onclick="removePropertyRow(${p.id})" title="Remove">✕</button>
+  </div>`;
+}
+
+function renderPropertyList() {
+  const el = document.getElementById("propList");
+  const tot = document.getElementById("propTotalLine");
+  if (!el) return;
+  if (propertyList.length === 0) {
+    el.innerHTML = '<div class="prop-empty">No properties added yet. Click + Add Property.</div>';
+    if (tot) tot.style.display = "none";
+    return;
+  }
+  el.innerHTML = propertyList.map(_propRow).join("");
+  const totalGain = propertyList.reduce((s,p) => s + (p.gain||0), 0);
+  const totalWht  = propertyList.reduce((s,p) => s + (p.wht||0), 0);
+  if (tot) {
+    tot.style.display = "";
+    tot.textContent = `Total Gain: Rs ${fmt(totalGain)}   |   Total WHT: Rs ${fmt(totalWht)}`;
+  }
+}
+
+function addPropertyRow() {
+  const id = ++_propId;
+  propertyList.push({ id, type:"Open Plot", years:0, gain:0, wht:0 });
+  renderPropertyList();
+}
+
+function removePropertyRow(id) {
+  propertyList = propertyList.filter(p => p.id !== id);
+  renderPropertyList();
+}
+
+function updatePropertyRow(id, key, val) {
+  const p = propertyList.find(p => p.id === id);
+  if (p) { p[key] = val; renderPropertyList(); }
+}
 
 /* ═══════════════════════════════════════════════
    WEALTH STATEMENT — Multi-entry dynamic lists
