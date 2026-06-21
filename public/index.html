@@ -23,6 +23,7 @@
 <meta name="application-name" content="GoFiler"/>
 
 <!-- PDF Export (cached by SW after first load → works offline) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <!-- SheetJS for XLSX bank statement import (cached by SW) -->
@@ -437,7 +438,8 @@ body[data-mode="advisor"] .nav-item.advisor-only{display:flex}
 .iris-section-hdr{background:linear-gradient(135deg,#1e3a5f,#1d4ed8);color:#fff;padding:10px 14px;display:flex;align-items:center;justify-content:space-between}
 .iris-section-title{font-size:12px;font-weight:800;letter-spacing:.5px;text-transform:uppercase}
 .iris-section-copy{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;font-size:10px;font-weight:700;padding:3px 10px;border-radius:5px;cursor:pointer;white-space:nowrap}
-.iris-row{display:grid;grid-template-columns:90px 1fr auto auto;gap:8px;align-items:center;padding:7px 12px;border-bottom:1px solid var(--border);transition:background .15s}
+.iris-row{display:grid;grid-template-columns:90px 1fr auto auto auto;gap:8px;align-items:center;padding:7px 12px;border-bottom:1px solid var(--border);transition:background .15s}
+.iris-row.no-comp{grid-template-columns:90px 1fr auto auto}
 .iris-row:last-child{border-bottom:none}
 .iris-row:hover{background:var(--surface2)}
 .iris-row.missing{background:rgba(239,68,68,.07);border-left:3px solid var(--red)}
@@ -452,6 +454,14 @@ body[data-mode="advisor"] .nav-item.advisor-only{display:flex}
 .iris-copy-btn.copied{border-color:var(--green);color:var(--green)}
 .iris-subhdr{grid-column:1/-1;font-size:10px;font-weight:700;color:var(--accent2);text-transform:uppercase;letter-spacing:.5px;padding:6px 12px;background:var(--surface2);border-bottom:1px solid var(--border)}
 .iris-missing-banner{background:rgba(239,68,68,.1);border:1px solid var(--red);border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:12px;color:#fca5a5}
+/* IRIS comparison column */
+.iris-comp-val{font-size:12px;font-weight:700;text-align:right;white-space:nowrap;padding:2px 6px;border-radius:4px}
+.iris-comp-val.match{color:#6ee7b7;background:rgba(16,185,129,.08)}
+.iris-comp-val.diff{color:#fbbf24;background:rgba(251,191,36,.1)}
+.iris-comp-val.empty{color:var(--muted);font-weight:400;font-style:italic}
+.iris-comp-hdr{display:flex;gap:16px;align-items:center;padding:4px 12px 6px;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--border);background:var(--surface2)}
+.iris-comp-hdr .c-cur{flex:1;text-align:right;color:var(--accent)}
+.iris-comp-hdr .c-fil{width:90px;text-align:right;color:#6ee7b7}
 .iris-ok-banner{background:rgba(34,197,94,.1);border:1px solid var(--green);border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:12px;color:#86efac}
 /* ── Bank Import ── */
 .bank-steps{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
@@ -760,6 +770,7 @@ input[type=range].ps::-moz-range-thumb{width:18px;height:18px;border-radius:50%;
           <div class="toggle-card" id="tog-property"    onclick="toggleSource('hasProperty','tog-property')">  <span class="ti">🏠</span><span>Property</span></div>
           <div class="toggle-card" id="tog-capital"     onclick="toggleSource('hasCapitalGains','tog-capital')"><span class="ti">📈</span><span>Capital Gains</span></div>
           <div class="toggle-card" id="tog-other"       onclick="toggleSource('hasOtherSources','tog-other')"> <span class="ti">💵</span><span>Other Sources</span></div>
+          <div class="toggle-card" id="tog-foreign"     onclick="toggleSource('hasForeignIncome','tog-foreign')"><span class="ti">🌍</span><span>Foreign Income</span></div>
         </div>
       </div>
       <div class="tab-next-bar">
@@ -891,6 +902,57 @@ input[type=range].ps::-moz-range-thumb{width:18px;height:18px;border-radius:50%;
           <div class="field"><label>Foreign Income (remitted)</label><input type="number" id="foreignIncome" min="0" placeholder="0"/></div>
           <div class="field"><label>Agricultural Income (exempt)</label><input type="number" id="agriculturalIncome" min="0" placeholder="0"/></div>
           <div class="field"><label>Other Income (Section 39)</label><input type="number" id="otherIncome" min="0" placeholder="0"/></div>
+        </div>
+      </div>
+
+      <!-- FOREIGN SOURCE INCOME -->
+      <div class="card hidden" id="sec-foreign">
+        <div class="card-title">🌍 Foreign Source Income <span style="font-size:11px;color:var(--muted)">Sections 50, 51, 102 — ITO 2001</span></div>
+
+        <!-- Returning Expatriate Exemption s.51 -->
+        <div class="section-sep" style="margin-top:0;padding-top:0;border:none">
+          <div class="section-label">Returning Expatriate — Section 51</div>
+        </div>
+        <div class="form-grid" style="margin-bottom:4px">
+          <div class="field form-full">
+            <label class="cb-label" style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">
+              <input type="checkbox" id="isReturningExpatriate" style="margin-top:3px;flex-shrink:0">
+              <span>I was a <strong>non-resident for the preceding 3+ tax years</strong> and am now resident for the first time — my foreign-source income is <strong>exempt</strong> for this tax year (Section 51).</span>
+            </label>
+          </div>
+        </div>
+        <div style="background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.25);border-radius:8px;padding:10px 14px;font-size:12px;color:#6ee7b7;margin-bottom:12px">
+          ℹ️ <strong>Section 51:</strong> A citizen of Pakistan who was non-resident for 3 preceding tax years is exempt from Pakistani tax on all foreign-source income in the first year of becoming resident. Enter figures below for disclosure purposes.
+        </div>
+
+        <!-- Foreign Salary s.50 -->
+        <div class="section-sep"><div class="section-label">Foreign Salary — Section 50</div></div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:8px">s.50: Include foreign salary in income. Relief = credit for foreign tax paid (lower of foreign tax or Pakistani tax attributable). Tax on foreign salary must have been paid in the source country.</div>
+        <div class="form-grid">
+          <div class="field"><label>Foreign Salary (PKR equivalent)</label><input type="number" id="foreignSalary" min="0" placeholder="0" oninput="calcForeignCredit()"/></div>
+          <div class="field"><label>Foreign Tax Paid on Salary (PKR equiv.)</label><input type="number" id="foreignTaxOnSalary" min="0" placeholder="0" oninput="calcForeignCredit()"/></div>
+          <div class="field"><label>Country of Source</label><input type="text" id="foreignSalaryCountry" placeholder="e.g. UAE, UK, USA"/></div>
+        </div>
+
+        <!-- Foreign Business Income s.102 -->
+        <div class="section-sep"><div class="section-label">Foreign Business Income — Section 102</div></div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:8px">s.102: Foreign tax credit = lower of (foreign tax paid) or (Pakistani tax × foreign income ÷ total income).</div>
+        <div class="form-grid">
+          <div class="field"><label>Foreign Business Profit (PKR equiv.)</label><input type="number" id="foreignBusinessIncome" min="0" placeholder="0" oninput="calcForeignCredit()"/></div>
+          <div class="field"><label>Foreign Tax Paid on Business (PKR equiv.)</label><input type="number" id="foreignTaxOnBusiness" min="0" placeholder="0" oninput="calcForeignCredit()"/></div>
+        </div>
+
+        <!-- Other Foreign Income s.102 -->
+        <div class="section-sep"><div class="section-label">Other Foreign Income — Section 102</div></div>
+        <div class="form-grid">
+          <div class="field"><label>Other Foreign Income (rent, interest, etc.)</label><input type="number" id="foreignOtherSourceIncome" min="0" placeholder="0" oninput="calcForeignCredit()"/></div>
+          <div class="field"><label>Foreign Tax Paid on Other Income</label><input type="number" id="foreignTaxOnOther" min="0" placeholder="0" oninput="calcForeignCredit()"/></div>
+        </div>
+
+        <!-- Live credit estimate -->
+        <div id="foreignCreditBox" style="display:none;background:rgba(139,92,246,.08);border:1px solid rgba(139,92,246,.25);border-radius:8px;padding:12px 16px;margin-top:8px;font-size:12px">
+          <div style="font-weight:700;color:#a78bfa;margin-bottom:6px">📊 Estimated Foreign Tax Credit (Section 102)</div>
+          <div id="foreignCreditDetail" style="color:var(--muted);line-height:1.8"></div>
         </div>
       </div>
 
@@ -1794,11 +1856,20 @@ input[type=range].ps::-moz-range-thumb{width:18px;height:18px;border-radius:50%;
         <button onclick="irisCopyAll()" id="irisCopyAllBtn" style="display:none;flex:1;background:var(--surface2);color:var(--text);border:1px solid var(--border);padding:11px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;min-width:140px">
           📑 Copy All Values
         </button>
+        <label id="irisUploadBtn" style="flex:1;background:rgba(16,185,129,.12);color:#6ee7b7;border:1px solid rgba(16,185,129,.3);padding:11px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;text-align:center;min-width:160px;box-sizing:border-box">
+          📎 Upload Filed Return (PDF)
+          <input type="file" accept=".pdf" style="display:none" onchange="loadFiledPDF(this)">
+        </label>
+        <button onclick="clearFiledPDF()" id="irisCompClearBtn" style="display:none;background:rgba(239,68,68,.12);color:#f87171;border:1px solid rgba(239,68,68,.2);padding:11px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer">
+          ✕ Clear
+        </button>
       </div>
+      <!-- Comparison status bar -->
+      <div id="irisCompStatus" style="display:none;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.25);border-radius:8px;padding:10px 14px;font-size:12px;color:#6ee7b7;margin-bottom:12px"></div>
       <div id="iris-placeholder" style="text-align:center;color:var(--muted);padding:40px">
         <div style="font-size:40px;margin-bottom:10px">📋</div>
         <div>Click <strong>Generate IRIS Pre-fill</strong> to map your return data to FBR Form 114 fields.</div>
-        <div style="font-size:12px;margin-top:8px;color:var(--muted)">Make sure you've entered your data in the other tabs first.</div>
+        <div style="font-size:12px;margin-top:8px;color:var(--muted)">After generating, you can <strong>upload your previously filed PDF return</strong> to compare figures side-by-side.</div>
       </div>
       <div id="iris-content" class="hidden"></div>
     </div>
@@ -1878,7 +1949,14 @@ function computeLocal(rawD) {
   const propertyIncome    = d.hasProperty     ? d.propertyNetIncome                    : 0;
   const otherNormalIncome = d.hasOtherSources ? d.otherIncome + d.foreignIncome        : 0;
 
-  const normalIncome  = taxableSalary + businessIncome + propertyIncome + otherNormalIncome;
+  // Foreign source income (ss. 50, 51, 102)
+  const totalForeignIncome = d.hasForeignIncome
+    ? (d.foreignSalary||0) + (d.foreignBusinessIncome||0) + (d.foreignOtherSourceIncome||0) : 0;
+  const foreignIncomeForTax = (d.hasForeignIncome && !d.isReturningExpatriate) ? totalForeignIncome : 0;
+  if (d.hasForeignIncome && d.isReturningExpatriate && totalForeignIncome > 0)
+    w.push(`Returning expatriate (s.51): Rs ${_fmt(totalForeignIncome)} foreign income is EXEMPT from Pakistani tax.`);
+
+  const normalIncome  = taxableSalary + businessIncome + propertyIncome + otherNormalIncome + foreignIncomeForTax;
   const taxableIncome = Math.max(0, normalIncome - d.zakat - d.workerWelfareFund);
 
   const isSalariedCase = taxableIncome === 0 || taxableSalary > 0.75 * taxableIncome;
@@ -1896,7 +1974,16 @@ function computeLocal(rawD) {
 
   const pensionCredit  = _round(Math.min(d.pensionFundContribution, _round(0.20 * taxableIncome)) * avgRate);
   const donationCredit = _round(Math.min(d.charitableDonations,     _round(0.30 * taxableIncome)) * avgRate);
-  const normalTaxNet   = Math.max(0, taxAfterRed + surcharge - pensionCredit - donationCredit);
+  // Section 102: Foreign Tax Credit = min(foreign tax paid, Pak tax × foreign income / total income)
+  const totalForeignTaxPaid = d.hasForeignIncome && !d.isReturningExpatriate
+    ? (d.foreignTaxOnSalary||0) + (d.foreignTaxOnBusiness||0) + (d.foreignTaxOnOther||0) : 0;
+  const foreignTaxCreditRaw = taxableIncome > 0 && foreignIncomeForTax > 0
+    ? _round(taxAfterRed * (foreignIncomeForTax / taxableIncome)) : 0;
+  const foreignTaxCredit102 = Math.min(totalForeignTaxPaid, foreignTaxCreditRaw);
+  if (foreignTaxCredit102 > 0)
+    w.push(`Foreign tax credit (s.102): Rs ${_fmt(foreignTaxCredit102)} (lower of Rs ${_fmt(totalForeignTaxPaid)} foreign tax paid vs Rs ${_fmt(foreignTaxCreditRaw)} Pak attributable tax).`);
+
+  const normalTaxNet   = Math.max(0, taxAfterRed + surcharge - pensionCredit - donationCredit - foreignTaxCredit102);
 
   const totalPod = d.profitOnDebtBank + d.profitOnDebtNss;
   if (totalPod > 5000000)
@@ -1945,7 +2032,7 @@ function computeLocal(rawD) {
   return {
     taxableSalary, businessIncome, propertyIncome, otherNormalIncome,
     normalIncome, taxableIncome, isSalariedCase,
-    normalTaxGross, teacherReduction, surcharge, pensionCredit, donationCredit, normalTaxNet,
+    normalTaxGross, teacherReduction, surcharge, pensionCredit, donationCredit, foreignTaxCredit102, normalTaxNet,
     finalTaxProfitOnDebt, finalTaxDividend, finalTaxCapitalGains,
     totalTaxChargeable, totalTaxPaid, balance,
     closingNetAssets, increaseInNetAssets, inflows, outflows, unreconciled, warnings: w
@@ -2037,7 +2124,7 @@ function toggleSource(key, toggleId) {
 function _checkPersonalNext() {
   const name   = (document.getElementById("name")?.value || "").trim();
   const cnic   = (document.getElementById("cnic")?.value || "").replace(/[^0-9]/g,"");
-  const anySrc = D.hasSalary || D.hasBusiness || D.hasProperty || D.hasCapitalGains || D.hasOtherSources;
+  const anySrc = D.hasSalary || D.hasBusiness || D.hasProperty || D.hasCapitalGains || D.hasOtherSources || D.hasForeignIncome;
   const ok     = name.length > 0 && cnic.length === 13 && anySrc;
   const btn    = document.getElementById("nextPersonalBtn");
   if (btn) {
@@ -2047,13 +2134,14 @@ function _checkPersonalNext() {
 }
 
 function updateIncomeSections() {
-  const any = D.hasSalary || D.hasBusiness || D.hasProperty || D.hasCapitalGains || D.hasOtherSources;
+  const any = D.hasSalary || D.hasBusiness || D.hasProperty || D.hasCapitalGains || D.hasOtherSources || D.hasForeignIncome;
   document.getElementById("income-placeholder").classList.toggle("hidden", any);
   toggle("sec-salary",   D.hasSalary);
   toggle("sec-business", D.hasBusiness);
   toggle("sec-property", D.hasProperty);
   toggle("sec-capital",  D.hasCapitalGains);
   toggle("sec-other",    D.hasOtherSources);
+  toggle("sec-foreign",  D.hasForeignIncome);
 }
 
 function toggle(id, show) {
@@ -2068,6 +2156,29 @@ function toggleSalaryMode() {
 }
 
 /* ─── Biz gross profit ─── */
+function calcForeignCredit() {
+  // Live s.102 credit estimate (rough — final computed in _computeTax)
+  const sal  = +document.getElementById("foreignSalary")?.value || 0;
+  const fts  = +document.getElementById("foreignTaxOnSalary")?.value || 0;
+  const biz  = +document.getElementById("foreignBusinessIncome")?.value || 0;
+  const ftb  = +document.getElementById("foreignTaxOnBusiness")?.value || 0;
+  const oth  = +document.getElementById("foreignOtherSourceIncome")?.value || 0;
+  const fto  = +document.getElementById("foreignTaxOnOther")?.value || 0;
+  const totalForeign = sal + biz + oth;
+  const totalForeignTax = fts + ftb + fto;
+  const box  = document.getElementById("foreignCreditBox");
+  const det  = document.getElementById("foreignCreditDetail");
+  if (!box) return;
+  if (totalForeign === 0) { box.style.display = "none"; return; }
+  box.style.display = "";
+  const exempt = document.getElementById("isReturningExpatriate")?.checked;
+  if (exempt) {
+    det.innerHTML = `<span style="color:#6ee7b7">✓ Returning expatriate (s.51): All foreign income of <strong>Rs ${fmt(totalForeign)}</strong> is <strong>exempt</strong> — no Pakistani tax due on foreign income.</span>`;
+  } else {
+    det.innerHTML = `Foreign income: Rs ${fmt(totalForeign)}<br>Foreign tax paid: Rs ${fmt(totalForeignTax)}<br><em style="color:#a78bfa">Credit (s.102) = lower of foreign tax paid OR Pakistani tax attributable to foreign income — computed in Summary tab.</em>`;
+  }
+}
+
 function calcBizGP() {
   const rev = +document.getElementById("businessRevenue").value || 0;
   const cos = +document.getElementById("businessCostOfSales").value || 0;
@@ -2147,6 +2258,16 @@ function collectForm() {
   D.taxDeductedProfit = n("taxDeductedProfit"); D.dividend = n("dividend");
   D.taxDeductedDividend = n("taxDeductedDividend"); D.foreignIncome = n("foreignIncome");
   D.agriculturalIncome = n("agriculturalIncome"); D.otherIncome = n("otherIncome");
+  // Foreign source income (ss. 50, 51, 102)
+  D.hasForeignIncome         = D.hasForeignIncome || false;
+  D.isReturningExpatriate    = b("isReturningExpatriate");
+  D.foreignSalary            = n("foreignSalary");
+  D.foreignTaxOnSalary       = n("foreignTaxOnSalary");
+  D.foreignSalaryCountry     = s("foreignSalaryCountry");
+  D.foreignBusinessIncome    = n("foreignBusinessIncome");
+  D.foreignTaxOnBusiness     = n("foreignTaxOnBusiness");
+  D.foreignOtherSourceIncome = n("foreignOtherSourceIncome");
+  D.foreignTaxOnOther        = n("foreignTaxOnOther");
 
   D.zakat = n("zakat"); D.pensionFundContribution = n("pensionFundContribution");
   D.charitableDonations = n("charitableDonations"); D.workerWelfareFund = n("workerWelfareFund");
@@ -2226,6 +2347,14 @@ function populateForm(data) {
   sv("taxDeductedProfit", D.taxDeductedProfit); sv("dividend", D.dividend);
   sv("taxDeductedDividend", D.taxDeductedDividend); sv("foreignIncome", D.foreignIncome);
   sv("agriculturalIncome", D.agriculturalIncome); sv("otherIncome", D.otherIncome);
+  // Foreign source income
+  if (D.isReturningExpatriate) { const el = document.getElementById("isReturningExpatriate"); if(el) el.checked = true; }
+  sv("foreignSalary", D.foreignSalary); sv("foreignTaxOnSalary", D.foreignTaxOnSalary);
+  ss("foreignSalaryCountry", D.foreignSalaryCountry);
+  sv("foreignBusinessIncome", D.foreignBusinessIncome); sv("foreignTaxOnBusiness", D.foreignTaxOnBusiness);
+  sv("foreignOtherSourceIncome", D.foreignOtherSourceIncome); sv("foreignTaxOnOther", D.foreignTaxOnOther);
+  if (D.hasForeignIncome) document.getElementById("tog-foreign")?.classList.add("on");
+  calcForeignCredit();
 
   sv("zakat", D.zakat); sv("pensionFundContribution", D.pensionFundContribution);
   sv("charitableDonations", D.charitableDonations); sv("workerWelfareFund", D.workerWelfareFund);
@@ -2413,6 +2542,7 @@ async function _saveReturn() {
   } catch(_) {}
 
   toast("Return saved for " + (D.name || rawCnic));
+  _dirty = false;
 }
 
 /* ─── Load saved list (Firestore primary, localStorage fallback) ─── */
@@ -2496,6 +2626,7 @@ async function loadReturn(cnic) {
   populateForm(data);
   document.querySelector("[data-tab=personal]").click();
   toast("Return loaded for " + (data.name || key));
+  _dirty = false;  // fresh load — no unsaved changes
 }
 
 async function deleteReturn(cnic) {
@@ -3454,7 +3585,7 @@ function generateIRIS() {
   function row(code, label, value, required = false) {
     const empty = (value === null || value === undefined || value === "" || value === 0);
     let valStr = empty ? (required ? "⚠ REQUIRED" : "—") : String(value);
-    const rowCls = required && empty ? "iris-row missing" : (empty ? "iris-row optional-empty" : "iris-row");
+    const rowCls = required && empty ? "iris-row no-comp missing" : (empty ? "iris-row no-comp optional-empty" : "iris-row no-comp");
     const valCls = required && empty ? "iris-value missing-val" : (empty ? "iris-value empty" : "iris-value");
     const copyVal = empty ? "" : String(value).replace("Rs ", "").replace(/,/g, "");
     return `<div class="${rowCls}">
@@ -3596,6 +3727,38 @@ function generateIRIS() {
     osRows += row("5029",   "Agricultural Income (exempt, for reconciliation)",  rs(D.agriculturalIncome));
     osRows += row("5029B",  "Other Receipts",                                     rs(D.otherIncome));
     html += section("💵", "Other Sources / Profit on Debt — Tab: Other Sources", osRows, "othersrc");
+  }
+
+  // ── SECTION 6B: FOREIGN SOURCE INCOME (ss. 50, 51, 102) ──
+  if (D.hasForeignIncome) {
+    let fRows = "";
+    const totFI = (D.foreignSalary||0) + (D.foreignBusinessIncome||0) + (D.foreignOtherSourceIncome||0);
+    const totFT = (D.foreignTaxOnSalary||0) + (D.foreignTaxOnBusiness||0) + (D.foreignTaxOnOther||0);
+    if (D.isReturningExpatriate) {
+      fRows += subhdr("Returning Expatriate — Section 51 (EXEMPT)");
+      fRows += row("FSI-00", "Exemption Basis", txt("Section 51 — first year of residence after 3+ years abroad"));
+    }
+    if (D.foreignSalary > 0) {
+      fRows += subhdr("Foreign Salary — Section 50");
+      fRows += row("FSI-01", "Foreign Salary (PKR equiv.)",             rs(D.foreignSalary), true);
+      fRows += row("FSI-02", "Country of Source",                        txt(D.foreignSalaryCountry || "—"));
+      fRows += row("FSI-03", "Foreign Tax Paid on Salary",              rs(D.foreignTaxOnSalary));
+    }
+    if (D.foreignBusinessIncome > 0) {
+      fRows += subhdr("Foreign Business Income — Section 102");
+      fRows += row("FSI-04", "Foreign Business Profit (PKR equiv.)",    rs(D.foreignBusinessIncome), true);
+      fRows += row("FSI-05", "Foreign Tax Paid on Business",            rs(D.foreignTaxOnBusiness));
+    }
+    if (D.foreignOtherSourceIncome > 0) {
+      fRows += subhdr("Other Foreign Income — Section 102");
+      fRows += row("FSI-06", "Other Foreign Income (PKR equiv.)",       rs(D.foreignOtherSourceIncome), true);
+      fRows += row("FSI-07", "Foreign Tax Paid (Other)",                rs(D.foreignTaxOnOther));
+    }
+    fRows += subhdr("Summary");
+    fRows += row("FSI-10",  "Total Foreign Income",                      rs(totFI), true);
+    fRows += row("FSI-11",  "Total Foreign Tax Paid",                    rs(totFT));
+    fRows += row("FSI-12",  D.isReturningExpatriate ? "Tax in Pakistan (Exempt — s.51)" : "Foreign Tax Credit Applied (s.102)", rs(D.isReturningExpatriate ? 0 : c.foreignTaxCredit102||0));
+    html += section("🌍", "Foreign Source Income — Sections 50, 51, 102", fRows, "foreigninc");
   }
 
   // ── SECTION 7: DEDUCTIBLE ALLOWANCES ──
@@ -3802,6 +3965,149 @@ function irisCopyAll() {
   navigator.clipboard.writeText(all.join("\n")).then(() => {
     toast("All IRIS values copied to clipboard!");
   }).catch(() => toast("Copy failed.", true));
+}
+
+/* ═══════════════════════════════════════════════════════
+   IRIS 114 — FILED RETURN PDF COMPARISON
+   ═══════════════════════════════════════════════════════ */
+let _filedPDFData = {};   // label → value extracted from uploaded PDF
+
+async function loadFiledPDF(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const status = document.getElementById("irisCompStatus");
+  status.style.display = "";
+  status.textContent = "⏳ Reading PDF…";
+
+  try {
+    // Configure PDF.js worker
+    if (typeof pdfjsLib === "undefined") throw new Error("PDF.js not loaded");
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+      "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    let fullText = "";
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      fullText += content.items.map(s => s.str).join(" ") + "\n";
+    }
+
+    _filedPDFData = _parseFiledReturn(fullText);
+    const matchCount = Object.keys(_filedPDFData).length;
+    status.textContent = `✓ "${file.name}" loaded — ${matchCount} field value${matchCount !== 1 ? "s" : ""} matched. Comparison column added below.`;
+    document.getElementById("irisCompClearBtn").style.display = "";
+    _applyComparisonColumn();
+  } catch(e) {
+    status.style.color = "#f87171";
+    status.textContent = "⚠ Could not parse PDF: " + e.message;
+    console.error(e);
+  }
+  input.value = "";
+}
+
+function _parseFiledReturn(text) {
+  const out = {};
+  // Normalize: collapse whitespace, remove commas from numbers
+  const t = text.replace(/\r/g, " ").replace(/\s+/g, " ");
+
+  // Generic pattern: look for "Label ... Rs XX,XX,XXX" or "Label ... XX,XX,XXX"
+  // Also look for GoFiler-style PDF which uses labels followed by values
+  const patterns = [
+    // GoFiler PDF format: known labels
+    { key:"Gross Salary",               re:/Gross Salary[\s:]+Rs\s*([\d,]+)/i },
+    { key:"Taxable Salary",             re:/Taxable Salary[\s:]+Rs\s*([\d,]+)/i },
+    { key:"Business Income",            re:/Net Business[\s\w]*Rs\s*([\d,]+)/i },
+    { key:"Property Income",            re:/Property[\s\w]*Net[\s:]+Rs\s*([\d,]+)/i },
+    { key:"Total Income",               re:/Total Income[\s:]+Rs\s*([\d,]+)/i },
+    { key:"Taxable Income",             re:/Taxable Income[\s:]+Rs\s*([\d,]+)/i },
+    { key:"Tax on Income",              re:/Tax on[\s\w]*Income[\s:]+Rs\s*([\d,]+)/i },
+    { key:"Tax Payable",                re:/Tax Payable[\s:]+Rs\s*([\d,]+)/i },
+    { key:"Net Tax",                    re:/Net Tax[\s:]+Rs\s*([\d,]+)/i },
+    { key:"Total Tax Paid",             re:/Total Tax Paid[\s:]+Rs\s*([\d,]+)/i },
+    { key:"Balance Due",                re:/Balance[\s\w]*Due[\s:]+Rs\s*([\d,]+)/i },
+    { key:"Refund Due",                 re:/Refund[\s\w]*Due[\s:]+Rs\s*([\d,]+)/i },
+    { key:"Profit on Debt",             re:/Profit on Debt[\s:]+Rs\s*([\d,]+)/i },
+    { key:"Dividend",                   re:/Dividend[\s:]+Rs\s*([\d,]+)/i },
+    { key:"Capital Gains",              re:/Capital Gain[\s:]+Rs\s*([\d,]+)/i },
+    { key:"Total Deductions",           re:/Total Deduct[\w\s:]+Rs\s*([\d,]+)/i },
+    { key:"Zakat",                      re:/Zakat[\s:]+Rs\s*([\d,]+)/i },
+    { key:"Total Wealth",               re:/Total Assets[\s:]+Rs\s*([\d,]+)/i },
+    // FBR IRIS PDF typical labels (Form-114)
+    { key:"Salary",                     re:/\b114.*?Salary.*?Rs\s*([\d,]+)/i },
+    { key:"Business",                   re:/Business\s+(?:Income|Receipts).*?Rs\s*([\d,]+)/i },
+  ];
+
+  patterns.forEach(({ key, re }) => {
+    const m = t.match(re);
+    if (m) {
+      const num = parseInt(m[1].replace(/,/g,""), 10);
+      if (!isNaN(num)) out[key] = num;
+    }
+  });
+
+  // Also scan for any "Rs X,XX,XXX" values near field codes (e.g. "6001 ... Rs 1,234")
+  const codeMatches = [...t.matchAll(/\b(\d{4,8})\b[\s\S]{1,60}?Rs\s*([\d,]+)/g)];
+  codeMatches.forEach(m => {
+    const code = m[1], val = parseInt(m[2].replace(/,/g,""), 10);
+    if (!isNaN(val) && val > 0) out["__code__" + code] = val;
+  });
+
+  return out;
+}
+
+function _applyComparisonColumn() {
+  if (Object.keys(_filedPDFData).length === 0) return;
+
+  // Add column header to each section
+  document.querySelectorAll(".iris-section").forEach(sec => {
+    if (sec.querySelector(".iris-comp-hdr")) return; // already added
+    const hdr = document.createElement("div");
+    hdr.className = "iris-comp-hdr";
+    hdr.innerHTML = '<span style="flex:1">Field</span><span class="c-cur">GoFiler</span><span class="c-fil">Filed Return</span><span style="width:60px"></span>';
+    sec.insertBefore(hdr, sec.querySelector(".iris-row") || null);
+  });
+
+  // For each IRIS row, add the comparison cell
+  document.querySelectorAll(".iris-row").forEach(row => {
+    row.classList.remove("no-comp");   // expand to 5-column grid
+    if (row.querySelector(".iris-comp-val")) return;
+    const label  = row.querySelector(".iris-label")?.textContent?.trim() || "";
+    const curVal = row.querySelector(".iris-value");
+    const code   = row.querySelector(".iris-code")?.textContent?.trim() || "";
+
+    // Try to match by label or code
+    let filed = null;
+    for (const [k, v] of Object.entries(_filedPDFData)) {
+      if (k.startsWith("__code__") && k === "__code__" + code) { filed = v; break; }
+      if (!k.startsWith("__code__") && label.toLowerCase().includes(k.toLowerCase())) { filed = v; break; }
+    }
+
+    const compEl = document.createElement("span");
+    compEl.className = "iris-comp-val";
+    if (filed === null) {
+      compEl.classList.add("empty"); compEl.textContent = "—";
+    } else {
+      const curNum = parseInt((curVal?.textContent || "").replace(/[^0-9]/g,""), 10) || 0;
+      const match  = Math.abs(curNum - filed) <= Math.max(1, curNum * 0.01); // within 1%
+      compEl.classList.add(match ? "match" : "diff");
+      compEl.textContent = "Rs " + filed.toLocaleString("en-PK");
+      if (!match && filed > 0) compEl.title = `GoFiler: Rs ${curNum.toLocaleString("en-PK")} vs Filed: Rs ${filed.toLocaleString("en-PK")}`;
+    }
+    // Insert before the copy button
+    const copyBtn = row.querySelector(".iris-copy-btn");
+    row.insertBefore(compEl, copyBtn);
+  });
+}
+
+function clearFiledPDF() {
+  _filedPDFData = {};
+  document.getElementById("irisCompStatus").style.display = "none";
+  document.getElementById("irisCompClearBtn").style.display = "none";
+  // Remove comparison elements and restore 4-column grid
+  document.querySelectorAll(".iris-comp-val, .iris-comp-hdr").forEach(el => el.remove());
+  document.querySelectorAll(".iris-row").forEach(row => row.classList.add("no-comp"));
 }
 
 /* ─── WhatsApp Share ─── */
@@ -4384,6 +4690,25 @@ document.addEventListener("DOMContentLoaded", function() {
     }
   });
 });
+
+/* ═══════════════════════════════════════════
+   UNSAVED CHANGES WARNING
+   ═══════════════════════════════════════════*/
+let _dirty = false;
+
+(function() {
+  // Mark dirty on any form input inside the main app
+  const appEl = () => document.getElementById("app");
+  document.addEventListener("input",  (e) => { if (appEl()?.contains(e.target)) _dirty = true; });
+  document.addEventListener("change", (e) => { if (appEl()?.contains(e.target)) _dirty = true; });
+  window.addEventListener("beforeunload", (e) => {
+    if (_dirty) {
+      e.preventDefault();
+      e.returnValue = "You have unsaved changes. Save your return before leaving.";
+      return e.returnValue;
+    }
+  });
+})();
 
 /* ═══════════════════════════════════════════
    ADVISOR CALCULATORS
