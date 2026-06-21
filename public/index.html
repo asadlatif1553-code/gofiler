@@ -4594,18 +4594,20 @@ async function openClient(cnic) {
   document.getElementById("backClientsBtn").classList.remove("hidden");
   document.getElementById("logoutBtn").classList.remove("hidden");
   _enterApp("advisor");
-  setTimeout(() => {
-    loadReturn(cnic);
-    // Pre-fill Personal tab from client record (only if fields are empty after load)
-    if (c) setTimeout(() => {
-      const nameEl = document.getElementById("name") || document.getElementById("fullName");
-      const cnicEl = document.getElementById("cnic");
-      const ntnEl  = document.getElementById("ntn");
-      if (nameEl && !nameEl.value && c.name) nameEl.value = c.name;
-      if (cnicEl && !cnicEl.value && c.cnic) cnicEl.value = c.cnic;
-      if (ntnEl  && !ntnEl.value  && c.ntn)  ntnEl.value  = c.ntn;
-    }, 400);
-  }, 100);
+  // Wait for DOM, then load saved return, then fill basic fields from client record
+  await new Promise(r => setTimeout(r, 150));
+  await loadReturn(cnic);
+  // After loadReturn completes, fill name/CNIC/NTN from client record if still empty
+  if (c) {
+    const nameEl = document.getElementById("name") || document.getElementById("fullName");
+    const cnicEl = document.getElementById("cnic");
+    const ntnEl  = document.getElementById("ntn");
+    if (nameEl && !nameEl.value && c.name) nameEl.value = c.name;
+    if (cnicEl && !cnicEl.value && c.cnic) cnicEl.value = c.cnic;
+    if (ntnEl  && !ntnEl.value  && c.ntn)  ntnEl.value  = c.ntn;
+  }
+  // Navigate to personal tab
+  document.querySelector("[data-tab=personal]")?.click();
 }
 
 async function deleteClient(cnic) {
