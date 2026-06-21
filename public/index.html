@@ -4633,8 +4633,13 @@ function caSetRole(role) {
     inp.placeholder  = role === "taxpayer" ? "3520212345678" : "you@example.com";
     inp.inputMode    = role === "taxpayer" ? "numeric" : "email";
     inp.type         = role === "taxpayer" ? "text" : "email";
-    inp.setAttribute("maxlength", role === "taxpayer" ? "13" : "254");
-    inp.value        = "";
+    if (role === "taxpayer") {
+      inp.setAttribute("maxlength", "13");
+    } else {
+      inp.removeAttribute("maxlength");   // no limit for email
+      inp.removeAttribute("inputmode");   // no numeric keyboard for email
+    }
+    inp.value = "";
   }
   document.getElementById("caErr").textContent = "";
 }
