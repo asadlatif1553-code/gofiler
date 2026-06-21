@@ -5325,7 +5325,7 @@ function calcFinalTax() {
     { head:"Property Sale Gain",    sec:"236C/37", rate:"3%",      wht: Number(D.taxDeductedCapitalGains||0),                regime:"final"  },
     { head:"Securities Gain <1yr",  sec:"37A",     rate:"15%",     wht: Number(D.securitiesGainLessThan1Yr||0) * 0.15,      regime:"final"  },
     { head:"Securities Gain 1–2yr", sec:"37A",     rate:"12.5%",   wht: Number(D.securitiesGain1To2Yr||0) * 0.125,          regime:"final"  },
-    { head:"IT/SW Exports (s.154A)",  sec:"154A",    rate:"0.25%/1%",wht: Number(n("wht_154a_wht")||D.misFinalWHT||0),       regime:"final"  },
+    { head:"IT/SW Exports (s.154A)",  sec:"154A",    rate:"0.25%/1%",wht: Number((document.getElementById("wht_154a_wht")||{}).value||0)||Number(D.misFinalWHT||0), regime:"final"  },
     { head:"Business WHT (s.153)",   sec:"153",     rate:"4–15%",   wht: Number(D.taxDeductedBusiness||0),                   regime:"mintax" },
     { head:"Rental Income WHT",     sec:"155",     rate:"15%",     wht: Number(D.taxDeductedRent||0),                        regime:"adj"    },
     { head:"Salary Tax",            sec:"149",     rate:"Slab",    wht: Number(D.taxDeductedSalary||0),                     regime:"adj"    },
@@ -6317,30 +6317,20 @@ function _misNatureBadge(n){
 }
 function misApplyToReturn(){
   var entries=misGetFiltered();
-  // ── Adjustable / Advance WHT → Deductions fields ──
   var phone=0,elec=0,vehicle=0,propBuy=0,propSell=0,salary=0,rent=0,profit=0,dividend=0,other=0;
-  // ── Final Tax → WHT Register (154A, 156, 156A) ──
   var ftr154aRec=0,ftr154aWht=0,ftr156Rec=0,ftr156Wht=0,ftr156aRec=0,ftr156aWht=0;
-  // ── Minimum Tax regime (153/154) → WHT Register ──
   var min153aRec=0,min153aWht=0,min153bRec=0,min153bWht=0,min153cRec=0,min153cWht=0,min154Rec=0,min154Wht=0;
 
   entries.forEach(function(r){
     var s=r.section;
-    // Final Tax u/s 154A
     if(s==='154A'){ftr154aRec+=r.taxableAmt;ftr154aWht+=r.paidAmt;return;}
-    // Final Tax u/s 156 (prizes/winnings)
     if(s==='156'){ftr156Rec+=r.taxableAmt;ftr156Wht+=r.paidAmt;return;}
-    // Final Tax u/s 156A (petroleum)
     if(s==='156A'){ftr156aRec+=r.taxableAmt;ftr156aWht+=r.paidAmt;return;}
-    // Minimum Tax u/s 153 goods
-    if(s==='153'&&r.desc&&r.desc.toLowerCase().indexOf('goods')>=0){min153aRec+=r.taxableAmt;min153aWht+=r.paidAmt;return;}
-    // Minimum Tax u/s 153 services
-    if(s==='153'&&r.desc&&(r.desc.toLowerCase().indexOf('service')>=0||r.desc.toLowerCase().indexOf('it ')>=0)){min153bRec+=r.taxableAmt;min153bWht+=r.paidAmt;return;}
-    // Minimum Tax u/s 153 contracts
+    var dl=(r.desc||'').toLowerCase();
+    if(s==='153'&&dl.indexOf('goods')>=0){min153aRec+=r.taxableAmt;min153aWht+=r.paidAmt;return;}
+    if(s==='153'&&(dl.indexOf('service')>=0||dl.indexOf('it ')>=0)){min153bRec+=r.taxableAmt;min153bWht+=r.paidAmt;return;}
     if(s==='153'){min153cRec+=r.taxableAmt;min153cWht+=r.paidAmt;return;}
-    // Minimum Tax u/s 154 exports
     if(s==='154'){min154Rec+=r.taxableAmt;min154Wht+=r.paidAmt;return;}
-    // Adjustable / Advance
     if(r.nature!=='adjustable'&&r.nature!=='advance')return;
     if(s==='149')salary+=r.paidAmt;
     else if(s==='155')rent+=r.paidAmt;
@@ -6354,58 +6344,98 @@ function misApplyToReturn(){
     else other+=r.paidAmt;
   });
 
-  // Helper: set DOM field + D object
-  var setF=function(id,v){if(v>0){var el=document.getElementById(id);if(el){el.value=v;if(typeof D!=='undefined'&&D.hasOwnProperty(id))D[id]=v;}}};
-  var addF=function(id,v){if(v>0){var el=document.getElementById(id);if(el){var cur=parseFloat(el.value)||0;el.value=cur+v;if(typeof D!=='undefined'&&D.hasOwnProperty(id))D[id]=cur+v;}}};
+  // Set DOM field and D object
+  var setEl=function(id,v){
+    var el=document.getElementById(id);
+    if(el){el.value=v||0;}
+    if(typeof D!=='undefined'){D[id]=v||0;}
+  };
+  var addEl=function(id,v){
+    if(!v)return;
+    var el=document.getElementById(id);
+    var cur=el?parseFloat(el.value)||0:0;
+    if(el){el.value=cur+v;}
+    if(typeof D!=='undefined'){D[id]=(typeof D[id]==='number'?D[id]:cur)+v;}
+  };
 
-  // Push adjustable WHT to Deductions tab
-  setF('taxDeductedSalary',salary);setF('taxDeductedRent',rent);setF('taxDeductedProfit',profit);
-  setF('taxDeductedDividend',dividend);setF('taxPhone',phone);setF('taxElectricity',elec);
-  setF('taxVehicle',vehicle);setF('taxPropertyPurchase',propBuy);setF('taxPropertySale',propSell);
-  if(other>0){addF('taxOtherAdjustable',other);}
+  // Push adjustable WHT to Deductions tab fields.
+  // IMPORTANT: Do NOT call whtSyncToReturn() — it would overwrite taxDeductedRent
+  // with wht_155_wht register field (empty unless user filled WHT tab separately).
+  if(salary){setEl('taxDeductedSalary',salary);}
+  if(rent){setEl('taxDeductedRent',rent);}
+  if(profit){setEl('taxDeductedProfit',profit);}
+  if(dividend){setEl('taxDeductedDividend',dividend);}
+  if(phone){setEl('taxPhone',phone);}
+  if(elec){setEl('taxElectricity',elec);}
+  if(vehicle){setEl('taxVehicle',vehicle);}
+  if(propBuy){setEl('taxPropertyPurchase',propBuy);}
+  if(propSell){setEl('taxPropertySale',propSell);}
+  if(other){addEl('taxOtherAdjustable',other);}
 
-  // Push FINAL TAX to WHT Register (Advisor Tools → Bank/WHT)
-  addF('wht_154a_rec',ftr154aRec); addF('wht_154a_wht',ftr154aWht);
-  addF('wht_156_rec',ftr156Rec);   addF('wht_156_wht',ftr156Wht);
-  addF('wht_156a_rec',ftr156aRec); addF('wht_156a_wht',ftr156aWht);
+  // Push Final Tax receipts → WHT Register DOM fields
+  setEl('wht_154a_rec',ftr154aRec); setEl('wht_154a_wht',ftr154aWht);
+  setEl('wht_156_rec',ftr156Rec);   setEl('wht_156_wht',ftr156Wht);
+  setEl('wht_156a_rec',ftr156aRec); setEl('wht_156a_wht',ftr156aWht);
 
-  // Push MINIMUM TAX receipts to WHT Register
-  addF('wht_153a_rec',min153aRec); addF('wht_153a_wht',min153aWht);
-  addF('wht_153b_rec',min153bRec); addF('wht_153b_wht',min153bWht);
-  addF('wht_153b_it_rec',0);  // IT services subset
-  addF('wht_153c_rec',min153cRec); addF('wht_153c_wht',min153cWht);
-  addF('wht_154_rec',min154Rec);   addF('wht_154_wht',min154Wht);
+  // Push Minimum Tax receipts → WHT Register DOM fields
+  setEl('wht_153a_rec',min153aRec); setEl('wht_153a_wht',min153aWht);
+  setEl('wht_153b_rec',min153bRec); setEl('wht_153b_wht',min153bWht);
+  setEl('wht_153c_rec',min153cRec); setEl('wht_153c_wht',min153cWht);
+  setEl('wht_154_rec',min154Rec);   setEl('wht_154_wht',min154Wht);
 
-  // Recompute WHT Register + sync to Summary/IRIS 114
-  if(typeof calcWHTRegister==='function') calcWHTRegister();
-  if(typeof whtSyncToReturn==='function') whtSyncToReturn();
-
-  // Store totals
+  // Store totals for Advisory Tools
+  var totalFinalWHT=ftr154aWht+ftr156Wht+ftr156aWht;
+  var totalMinWHT=min153aWht+min153bWht+min153cWht+min154Wht;
+  var totalMinRec=min153aRec+min153bRec+min153cRec+min154Rec;
   if(typeof D!=='undefined'){
+    D.misFinalWHT=totalFinalWHT;
     D.misAdjustableWHT=entries.filter(function(r){return r.nature==='adjustable'||r.nature==='advance';}).reduce(function(acc,r){return acc+r.paidAmt;},0);
-    D.misFinalWHT=ftr154aWht+ftr156Wht+ftr156aWht;
   }
 
+  // Recompute WHT Register widget
+  if(typeof calcWHTRegister==='function') calcWHTRegister();
+
+  // Set window._whtReg DIRECTLY so computeAndShow() sees FTR data for IRIS 114 Annex-C.
+  // (We do not call whtSyncToReturn() to avoid it clobbering taxDeductedRent/Business.)
+  var prev=window._whtReg||{};
+  window._whtReg={
+    minTaxRec:   totalMinRec,
+    minTaxWHT:   totalMinWHT,
+    finalRec154a: ftr154aRec,
+    finalRec156:  ftr156Rec,
+    finalRec156a: ftr156aRec,
+    finalWHT:     totalFinalWHT,
+    rentWHT:      rent,
+    importWHT:    prev.importWHT||0,
+    manufGoods:   prev.manufGoods||0
+  };
+
+  // Trigger IRIS 114 + Summary recompute
+  try{computeAndShow();}catch(e){console.warn('computeAndShow err:',e);}
+
+  // Status display
   var lines=[];
-  if(salary)lines.push('Salary WHT: Rs '+_fmt(salary));
-  if(rent)lines.push('Rent WHT: Rs '+_fmt(rent));
-  if(profit)lines.push('Profit-on-Debt WHT: Rs '+_fmt(profit));
-  if(phone)lines.push('Phone: Rs '+_fmt(phone));
-  if(elec)lines.push('Electricity: Rs '+_fmt(elec));
-  if(vehicle)lines.push('Vehicle: Rs '+_fmt(vehicle));
-  if(propBuy)lines.push('Property Buy: Rs '+_fmt(propBuy));
-  if(propSell)lines.push('Property Sell: Rs '+_fmt(propSell));
-  if(ftr154aWht)lines.push('FTR 154A (IT exports): Rs '+_fmt(ftr154aWht)+' on Rs '+_fmt(ftr154aRec)+' receipts → WHT Register');
-  if(ftr156Wht)lines.push('FTR 156 (Prizes): Rs '+_fmt(ftr156Wht)+' → WHT Register');
-  if(min153aWht+min153bWht+min153cWht+min154Wht>0)lines.push('Min Tax 153/154: Rs '+_fmt(min153aWht+min153bWht+min153cWht+min154Wht)+' → WHT Register');
+  if(salary)lines.push('Salary (s.149): Rs '+_fmt(salary));
+  if(rent)lines.push('Rent (s.155): Rs '+_fmt(rent));
+  if(profit)lines.push('Profit-on-Debt (s.151): Rs '+_fmt(profit));
+  if(dividend)lines.push('Dividend (s.150): Rs '+_fmt(dividend));
+  if(phone)lines.push('Phone (s.236): Rs '+_fmt(phone));
+  if(elec)lines.push('Electricity (s.235): Rs '+_fmt(elec));
+  if(vehicle)lines.push('Vehicle (s.234): Rs '+_fmt(vehicle));
+  if(propBuy)lines.push('Prop Buy (s.236K): Rs '+_fmt(propBuy));
+  if(propSell)lines.push('Prop Sell (s.236C): Rs '+_fmt(propSell));
   if(other)lines.push('Other adj: Rs '+_fmt(other));
+  if(ftr154aWht)lines.push('<strong style="color:#f59e0b">FTR 154A: Rs '+_fmt(ftr154aWht)+' WHT on Rs '+_fmt(ftr154aRec)+' receipts → WHT Register + IRIS Annex-C</strong>');
+  if(ftr156Wht)lines.push('FTR 156 Prizes: Rs '+_fmt(ftr156Wht)+' → WHT Register');
+  if(ftr156aWht)lines.push('FTR 156A: Rs '+_fmt(ftr156aWht)+' → WHT Register');
+  if(totalMinWHT)lines.push('Min Tax 153/154: Rs '+_fmt(totalMinWHT)+' on Rs '+_fmt(totalMinRec)+' receipts → WHT Register');
 
   var st=document.getElementById('misApplyStatus');
   st.style.display='block';
   st.innerHTML=lines.length
-    ?'<strong>Applied to Deductions + WHT Register + IRIS 114:</strong><br>'+lines.join(' &nbsp;|&nbsp; ')
-    :'No mappable entries found in this tax year.';
-  setTimeout(function(){st.style.display='none';},10000);
+    ?'<strong style="color:#34d399">&#10003; Applied:</strong> '+lines.join(' &nbsp;|&nbsp; ')
+    :'No mappable entries found for this tax year.';
+  setTimeout(function(){st.style.display='none';},12000);
 }
 function misShowError(msg){var el=document.getElementById('misError');el.textContent=msg;el.style.display='block';}
 function misReset(){
@@ -6486,113 +6516,4 @@ function misReset(){
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════
-     ADVISOR DASHBOARD
-     ══════════════════════════════════════════ -->
-<div id="advisorDashboard" class="hidden">
-  <div class="adv-dash-header">
-    <div class="adv-dash-logo">⚖️</div>
-    <div>
-      <div class="adv-dash-title">Client Dashboard</div>
-      <div class="adv-dash-sub">Welcome, <span id="advDashName">Advisor</span></div>
-    </div>
-    <div class="adv-dash-spacer"></div>
-    <button class="adv-dash-logout" onclick="logout()">🔓 Logout</button>
-  </div>
-  <div class="adv-dash-body">
-    <div class="adv-dash-toolbar">
-      <input class="adv-search" id="advSearch" type="text" placeholder="🔍 Search by name, CNIC..." oninput="renderClientList(this.value)">
-      <button class="adv-add-btn" onclick="showAddClientModal()">+ Add New Client</button>
-    </div>
-    <div class="adv-clients-grid" id="advClientList">
-      <div class="adv-empty"><div class="adv-empty-icon">👥</div>Loading clients…</div>
-    </div>
-  </div>
-</div>
-
-<!-- ══════════════════════════════════════════
-     ADD CLIENT MODAL
-     ══════════════════════════════════════════ -->
-<div id="addClientModal" class="hidden">
-  <div class="adv-modal-box">
-    <div class="adv-modal-title">Add New Client</div>
-    <div class="adv-modal-sub">Enter client details to begin their return</div>
-    <div class="ca-field">
-      <label>Full Name</label>
-      <input type="text" id="acName" placeholder="Client full name" autocomplete="off">
-    </div>
-    <div class="ca-field">
-      <label>CNIC (13 digits)</label>
-      <input type="text" id="acCnic" placeholder="3520212345678" inputmode="numeric" maxlength="13" autocomplete="off">
-    </div>
-    <div class="ca-field">
-      <label>NTN (optional)</label>
-      <input type="text" id="acNtn" placeholder="NTN Number" autocomplete="off">
-    </div>
-    <div id="acErr" style="color:#f87171;font-size:12px;min-height:16px;margin-bottom:8px"></div>
-    <div class="adv-modal-actions">
-      <button class="ca-cancel" onclick="document.getElementById('addClientModal').classList.add('hidden')">Cancel</button>
-      <button class="ca-submit" onclick="addClient()">+ Add Client</button>
-    </div>
-  </div>
-</div>
-
-<!-- ══════════════════════════════════════════
-     ROLE OVERLAY
-     ══════════════════════════════════════════ -->
-<div id="roleOverlay" class="hidden">
-  <div class="role-logo">
-    <div class="role-logo-mark">GF</div>
-    <div><h2>GoFiler</h2><span>Pakistan Income Tax Return — Tax Year 2026</span></div>
-  </div>
-  <p class="role-tagline">Before we begin, tell us who you are so we can tailor the experience for you.</p>
-  <div class="role-cards">
-    <div class="role-card individual" tabindex="0" onclick="setMode('individual')" onkeydown="if(event.key==='Enter'||event.key===' ')setMode('individual')">
-      <span class="rc-icon">👤</span>
-      <div class="rc-title">Individual Filer</div>
-      <div class="rc-desc">I'm filing my own income tax return. Show me a clean, simple interface with guided help at every step.</div>
-      <span class="rc-badge">Simplified View</span>
-    </div>
-    <div class="role-card advisor" tabindex="0" onclick="setMode('advisor')" onkeydown="if(event.key==='Enter'||event.key===' ')setMode('advisor')">
-      <span class="rc-icon">⚖️</span>
-      <div class="rc-title">Tax Advisor</div>
-      <div class="rc-desc">I manage returns for multiple clients. Show me the full advisor toolkit and client dashboard.</div>
-      <span class="rc-badge">Advisor Mode</span>
-    </div>
-  </div>
-</div>
-
-<!-- ── Lead Capture Modal ── -->
-<div id="leadOverlay">
-  <div id="leadModal" role="dialog" aria-modal="true" aria-labelledby="leadTitle">
-    <div class="lm-header">
-      <div class="lm-logo">
-        <div class="lm-logo-mark">GF</div>
-        <span style="font-size:13px;font-weight:700;color:#fff;opacity:.9">GoFiler — Pakistan Tax Returns</span>
-      </div>
-      <div class="lm-title" id="leadTitle">Almost there! 🎯</div>
-      <div class="lm-sub">Save your progress &amp; get free tax tips for TY 2026 delivered to your inbox.</div>
-    </div>
-    <div class="lm-body">
-      <div class="lm-benefit">
-        <span style="font-size:16px;flex-shrink:0">💡</span>
-        <span>Enter your details once — we'll send you FBR deadline alerts, refund tips, and updates tailored to your return.</span>
-      </div>
-      <div class="lm-field">
-        <label for="leadEmail">Email Address</label>
-        <input type="email" id="leadEmail" placeholder="you@example.com" autocomplete="email">
-      </div>
-      <div class="lm-field">
-        <label for="leadPhone">Mobile Number (WhatsApp)</label>
-        <input type="tel" id="leadPhone" placeholder="+92 300 0000000" autocomplete="tel">
-      </div>
-      <div class="lm-actions">
-        <button class="lm-submit" id="leadSubmitBtn" onclick="leadSubmit()">✅ Continue &amp; Proceed</button>
-        <button onclick="leadSkip()" style="background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;padding:4px;text-decoration:underline">Skip for now</button>
-      </div>
-      <div class="lm-note">🔒 Your data stays private. We never share it with third parties.</div>
-    </div>
-  </div>
-</div>
-</body>
-</html>
+<!-- ════════════════════════════════════════�
