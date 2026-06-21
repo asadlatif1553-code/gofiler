@@ -4620,7 +4620,18 @@ function lsSetTab(role) {
   const lbl = document.getElementById("lsIdLabel");
   const inp = document.getElementById("lsId");
   if (lbl) lbl.textContent = role === "taxpayer" ? "CNIC (13 digits)" : "Email / Username";
-  if (inp) inp.placeholder = role === "taxpayer" ? "e.g. 3520212345678" : "you@example.com";
+  if (inp) {
+    inp.placeholder = role === "taxpayer" ? "e.g. 3520212345678" : "you@example.com";
+    inp.type        = role === "taxpayer" ? "text"  : "email";
+    inp.inputMode   = role === "taxpayer" ? "numeric" : "";
+    if (role === "taxpayer") {
+      inp.setAttribute("maxlength", "13");
+    } else {
+      inp.removeAttribute("maxlength");
+      inp.removeAttribute("inputmode");
+    }
+    inp.value = "";
+  }
   document.getElementById("lsErr").textContent = "";
 }
 
