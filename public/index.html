@@ -83,7 +83,7 @@ function _fbPin(pin) { return pin + "_gf"; }
   --yellow:#d97706;--text:#0f172a;--muted:#64748b;--radius:10px;
   --shadow:0 4px 24px rgba(0,0,0,.08);
 }
-body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;overflow-x:hidden}
 a{color:var(--accent);text-decoration:none}
 /* ── Header ── */
 header{background:#ffffff;padding:12px 24px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;box-shadow:0 1px 4px rgba(0,0,0,.06)}
@@ -103,7 +103,7 @@ nav{width:200px;flex-shrink:0;background:var(--surface);border-right:1px solid v
 .nav-item .icon{font-size:16px;width:20px;text-align:center}
 .nav-badge{margin-left:auto;background:var(--green);color:#fff;font-size:10px;padding:2px 6px;border-radius:10px;font-weight:700}
 /* ── Main ── */
-main{flex:1;padding:24px;overflow-y:auto;max-width:860px;-webkit-overflow-scrolling:touch}
+main{flex:1;padding:24px;overflow-y:auto;overflow-x:hidden;max-width:860px;-webkit-overflow-scrolling:touch}
 .tab-panel{display:none}
 .tab-panel.active{display:block}
 /* ── Cards ── */
@@ -125,9 +125,9 @@ main{flex:1;padding:24px;overflow-y:auto;max-width:860px;-webkit-overflow-scroll
 .field input,.field select{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:8px 10px;color:var(--text);font-size:13px;width:100%;transition:border .2s}
 .field input:focus,.field select:focus{outline:none;border-color:var(--accent)}
 .field input[type=number]{text-align:right}
-.checkbox-row{display:flex;align-items:center;gap:8px;padding:8px 0;cursor:pointer}
-.checkbox-row input{width:16px;height:16px;accent-color:var(--accent);cursor:pointer}
-.checkbox-row span{font-size:13px}
+.checkbox-row{display:flex;align-items:flex-start;gap:8px;padding:8px 0;cursor:pointer}
+.checkbox-row input{width:16px;height:16px;accent-color:var(--accent);cursor:pointer;flex-shrink:0;margin-top:2px}
+.checkbox-row span{font-size:13px;min-width:0;overflow-wrap:break-word}
 /* ── Section separator ── */
 .section-sep{border-top:1px solid var(--border);margin:14px 0;padding-top:14px}
 .section-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
@@ -934,8 +934,8 @@ input[type=range].ps::-moz-range-thumb{width:18px;height:18px;border-radius:50%;
         </div>
         <div class="form-grid" style="margin-bottom:4px">
           <div class="field form-full">
-            <label class="cb-label" style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">
-              <input type="checkbox" id="isReturningExpatriate" style="margin-top:3px;flex-shrink:0">
+            <label class="checkbox-row">
+              <input type="checkbox" id="isReturningExpatriate">
               <span>I was a <strong>non-resident for the preceding 3+ tax years</strong> and am now resident for the first time — my foreign-source income is <strong>exempt</strong> for this tax year (Section 51).</span>
             </label>
           </div>
