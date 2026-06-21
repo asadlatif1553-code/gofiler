@@ -2136,12 +2136,16 @@ function computeLocal(rawD) {
       w.push(`${p.type} held ${p.years}+ years: gain exempt (Rs ${_fmt(p.gain)} excluded).`);
   });
 
-  const totalTaxChargeable = normalTaxNet + finalTaxProfitOnDebt + finalTaxDividend + finalTaxCapitalGains;
+  // Final Tax u/s 154A (IT/SW Exports) + s.156 (Prizes) + s.156A (Petroleum) — already deducted as WHT
+  const finalTax154a   = _round(rawD.misFinalWHT || 0);
+  // Min Tax u/s 153/154 — already deducted as WHT (not included in totalTaxChargeable as separate item, already in totalTaxPaid via taxDeductedBusiness)
+  const totalTaxChargeable = normalTaxNet + finalTaxProfitOnDebt + finalTaxDividend + finalTaxCapitalGains + finalTax154a;
 
   const totalTaxPaid = d.taxDeductedSalary + d.taxDeductedBusiness + d.taxDeductedRent +
     d.taxDeductedProfit + d.taxDeductedDividend + d.taxDeductedCapitalGains +
     d.taxPhone + d.taxElectricity + d.taxVehicle +
-    d.taxPropertyPurchase + d.taxPropertySale + d.taxOtherAdjustable;
+    d.taxPropertyPurchase + d.taxPropertySale + d.taxOtherAdjustable +
+    finalTax154a;  // s.154A/156/156A WHT already deducted = full discharge of final tax liability
 
   const balance = totalTaxChargeable - totalTaxPaid;
 
@@ -2156,10 +2160,10 @@ function computeLocal(rawD) {
     w.push(`Wealth statement is out of balance by Rs ${_fmt(unreconciled)}. Inflows minus outflows must equal the increase in net assets.`);
 
   return {
-    taxableSalary, businessIncome, propertyIncome, otherNormalIncome,
+    taxableSalary, businessIncome, propertyIncome, otherNormalIncome, ftrGrossReceipts154a: rawD.ftrGrossReceipts154a||0,
     normalIncome, taxableIncome, isSalariedCase,
     normalTaxGross, teacherReduction, surcharge, pensionCredit, donationCredit, foreignTaxCredit102, normalTaxNet,
-    finalTaxProfitOnDebt, finalTaxDividend, finalTaxCapitalGains,
+    finalTaxProfitOnDebt, finalTaxDividend, finalTaxCapitalGains, finalTax154a,
     totalTaxChargeable, totalTaxPaid, balance,
     closingNetAssets, increaseInNetAssets, inflows, outflows, unreconciled, warnings: w
   };
@@ -2551,10 +2555,11 @@ function renderSummary(c) {
     <table class="tax-table">
       <tr><th>Source</th><th style="text-align:right">Amount (Rs)</th></tr>
       ${row("Taxable Salary", c.taxableSalary, c.taxableSalary===0)}
-      ${row("Business Income", c.businessIncome, c.businessIncome===0)}
+      ${row("Business Income (Normal Tax)", c.businessIncome, c.businessIncome===0)}
       ${row("Property Income", c.propertyIncome, c.propertyIncome===0)}
       ${row("Other Normal Income", c.otherNormalIncome, c.otherNormalIncome===0)}
       <tr class="total"><td>Normal Taxable Income</td><td>${fmt(c.taxableIncome)}</td></tr>
+      ${c.ftrGrossReceipts154a > 0 ? `<tr style="color:var(--yellow)"><td>⚡ FTR — IT/SW Export Receipts u/s 154A <small>(excluded from normal income)</small></td><td>${fmt(c.ftrGrossReceipts154a)}</td></tr>` : ""}
     </table>
   </div>
 
@@ -2575,10 +2580,12 @@ function renderSummary(c) {
     <div class="card-title">💸 Final Taxes (Separate Computation)</div>
     <table class="tax-table">
       <tr><th>Head</th><th style="text-align:right">Rs</th></tr>
+      ${row("IT/SW Exports u/s 154A (FTR)", c.finalTax154a, c.finalTax154a===0)}
+      ${row("Prizes/Winnings u/s 156 (FTR)", 0, true)}
       ${row("Profit on Debt (Bank 20% + NSS 15%)", c.finalTaxProfitOnDebt, c.finalTaxProfitOnDebt===0)}
       ${row("Dividend u/s 5 (15%)", c.finalTaxDividend, c.finalTaxDividend===0)}
       ${row("Capital Gains", c.finalTaxCapitalGains, c.finalTaxCapitalGains===0)}
-      <tr class="total"><td>Total Final Tax</td><td>${fmt(c.finalTaxProfitOnDebt+c.finalTaxDividend+c.finalTaxCapitalGains)}</td></tr>
+      <tr class="total"><td>Total Final Tax</td><td>${fmt(c.finalTax154a+c.finalTaxProfitOnDebt+c.finalTaxDividend+c.finalTaxCapitalGains)}</td></tr>
     </table>
   </div>
 
@@ -2587,9 +2594,10 @@ function renderSummary(c) {
     <table class="tax-table">
       <tr><th>Item</th><th style="text-align:right">Rs</th></tr>
       <tr><td>Normal Tax (Net)</td><td>${fmt(c.normalTaxNet)}</td></tr>
-      <tr><td>Final Tax — Profit on Debt</td><td>${fmt(c.finalTaxProfitOnDebt)}</td></tr>
-      <tr><td>Final Tax — Dividend</td><td>${fmt(c.finalTaxDividend)}</td></tr>
-      <tr><td>Final Tax — Capital Gains</td><td>${fmt(c.finalTaxCapitalGains)}</td></tr>
+      ${c.finalTax154a ? `<tr><td>Final Tax — IT/SW Exports u/s 154A</td><td>${fmt(c.finalTax154a)}</td></tr>` : ""}
+      ${c.finalTaxProfitOnDebt ? `<tr><td>Final Tax — Profit on Debt</td><td>${fmt(c.finalTaxProfitOnDebt)}</td></tr>` : ""}
+      ${c.finalTaxDividend ? `<tr><td>Final Tax — Dividend</td><td>${fmt(c.finalTaxDividend)}</td></tr>` : ""}
+      ${c.finalTaxCapitalGains ? `<tr><td>Final Tax — Capital Gains</td><td>${fmt(c.finalTaxCapitalGains)}</td></tr>` : ""}
       <tr class="total"><td>Total Tax Chargeable</td><td>${fmt(c.totalTaxChargeable)}</td></tr>
       <tr class="sub"><td>&nbsp;&nbsp;Less: Total Taxes Paid / Withheld</td><td style="color:var(--green)">−${fmt(c.totalTaxPaid)}</td></tr>
       <tr class="total"><td style="color:${c.balance>0?'var(--red)':'var(--green)'}">${c.balance>=0?"Tax Payable":"Refund Due"}</td>
@@ -6389,6 +6397,7 @@ function misApplyToReturn(){
   var totalMinRec=min153aRec+min153bRec+min153cRec+min154Rec;
   if(typeof D!=='undefined'){
     D.misFinalWHT=totalFinalWHT;
+    D.ftrGrossReceipts154a=ftr154aRec;
     D.misAdjustableWHT=entries.filter(function(r){return r.nature==='adjustable'||r.nature==='advance';}).reduce(function(acc,r){return acc+r.paidAmt;},0);
   }
 
@@ -6410,8 +6419,8 @@ function misApplyToReturn(){
     manufGoods:   prev.manufGoods||0
   };
 
-  // Trigger IRIS 114 + Summary recompute
-  try{computeAndShow();}catch(e){console.warn('computeAndShow err:',e);}
+  // Trigger Summary recompute
+  try{computeTax();}catch(e){console.warn('computeTax err:',e);}
 
   // Status display
   var lines=[];
