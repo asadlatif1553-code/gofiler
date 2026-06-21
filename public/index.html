@@ -730,6 +730,7 @@ input[type=range].ps::-moz-range-thumb{width:18px;height:18px;border-radius:50%;
     <div class="nav-item" data-tab="chat">             <span class="icon">💬</span><span>Tax Advisor</span></div>
     <div class="nav-item" data-tab="iris">             <span class="icon">📋</span><span>IRIS 114</span></div>
     <div class="nav-item" data-tab="bank">             <span class="icon">🏦</span><span>Bank Import</span></div>
+    <div class="nav-item" data-tab="mis">              <span class="icon">&#x1F4C4;</span><span>MIS WHT</span></div>
     <div style="flex:1"></div>
     <div class="nav-item" data-tab="saved">            <span class="icon">📁</span><span>Saved</span></div>
   </nav>
@@ -1865,6 +1866,104 @@ input[type=range].ps::-moz-range-thumb{width:18px;height:18px;border-radius:50%;
       </div>
 
     </div>
+    <!-- ══════════════════════ MIS WHT REPORT TAB ══════════════════════ -->
+    <div class="tab-panel" id="tab-mis">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-icon">📑</span>
+          <div>
+            <div class="card-title">MIS WHT Report</div>
+            <div class="card-subtitle">Upload FBR IRIS MIS Excel — classify and apply Withholding Tax</div>
+          </div>
+        </div>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:12px">
+          Download the <strong>MIS WHT Payment Report</strong> from FBR IRIS → Reports → Withholding Tax.
+          Section codes are classified as <span style="color:#34d399;font-weight:700">Adjustable</span> (s.168),
+          <span style="color:#fbbf24;font-weight:700">Final</span> (s.169), or
+          <span style="color:#a5b4fc;font-weight:700">Advance</span> (s.147).
+          Click <em>Apply to Return</em> to push amounts into the Deductions tab.</p>
+        <div id="misDropZone" class="bank-drop" onclick="document.getElementById('misFileInput').click()"
+             ondragover="misDragOver(event)" ondragleave="misDragLeave(event)" ondrop="misDrop(event)"
+             style="margin-bottom:16px">
+          <div style="font-size:28px;margin-bottom:6px">📂</div>
+          <div style="font-weight:700;margin-bottom:4px">Drop MIS Excel here or click to browse</div>
+          <div style="font-size:12px;color:var(--muted)">.xls or .xlsx from FBR IRIS MIS Report</div>
+          <input type="file" id="misFileInput" accept=".xls,.xlsx" style="display:none" onchange="misFileSelected(this)">
+        </div>
+        <div id="misError" style="display:none;background:rgba(239,68,68,.1);border:1px solid var(--red);border-radius:8px;padding:10px 14px;font-size:13px;color:#fca5a5;margin-bottom:12px"></div>
+        <div style="display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap">
+          <label style="font-size:13px;font-weight:600">Tax Year:</label>
+          <select id="misTaxYearFilter" onchange="misRender()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px 12px;border-radius:6px;font-size:13px">
+            <option value="all">All Years</option>
+            <option value="2026" selected>TY2026 (Jul 2025 – Jun 2026)</option>
+            <option value="2025">TY2025 (Jul 2024 – Jun 2025)</option>
+          </select>
+        </div>
+        <div id="misResults" style="display:none">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:18px">
+            <div style="background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:8px;padding:12px;text-align:center">
+              <div style="font-size:10px;color:#34d399;font-weight:700;text-transform:uppercase;margin-bottom:4px">Adjustable WHT</div>
+              <div id="misAdjTotal" style="font-size:18px;font-weight:800;color:#34d399">Rs 0</div>
+              <div style="font-size:10px;color:var(--muted);margin-top:2px">Credit vs Tax (s.168)</div>
+            </div>
+            <div style="background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);border-radius:8px;padding:12px;text-align:center">
+              <div style="font-size:10px;color:#fbbf24;font-weight:700;text-transform:uppercase;margin-bottom:4px">Final WHT</div>
+              <div id="misFinalTotal" style="font-size:18px;font-weight:800;color:#fbbf24">Rs 0</div>
+              <div style="font-size:10px;color:var(--muted);margin-top:2px">Full &amp; Final (s.169)</div>
+            </div>
+            <div style="background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.3);border-radius:8px;padding:12px;text-align:center">
+              <div style="font-size:10px;color:#a5b4fc;font-weight:700;text-transform:uppercase;margin-bottom:4px">Advance Tax</div>
+              <div id="misAdvTotal" style="font-size:18px;font-weight:800;color:#a5b4fc">Rs 0</div>
+              <div style="font-size:10px;color:var(--muted);margin-top:2px">Always Adjustable (s.147)</div>
+            </div>
+            <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center">
+              <div style="font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:4px">Total Entries</div>
+              <div id="misTotalCount" style="font-size:18px;font-weight:800;color:var(--text)">0</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px">
+            <button class="btn-primary" onclick="misApplyToReturn()" style="font-size:13px">Apply to Return</button>
+            <button class="btn-secondary" onclick="lsSetTab('deductions')" style="font-size:13px">Deductions Tab</button>
+            <button class="btn-secondary" onclick="lsSetTab('bank')" style="font-size:13px">WHT Register</button>
+            <button class="btn-secondary" onclick="misReset()" style="font-size:13px;color:#fca5a5">Reset</button>
+          </div>
+          <div id="misApplyStatus" style="display:none;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:6px;padding:8px 12px;font-size:12px;color:#34d399;margin-bottom:14px"></div>
+          <div style="font-weight:700;font-size:14px;margin-bottom:8px">Section-wise Summary</div>
+          <div style="overflow-x:auto;margin-bottom:20px">
+            <table style="width:100%;border-collapse:collapse;font-size:12px">
+              <thead><tr style="background:var(--surface2)">
+                <th style="padding:8px 10px;text-align:left">Section</th>
+                <th style="padding:8px 10px;text-align:left">Description</th>
+                <th style="padding:8px 10px;text-align:right">Taxable</th>
+                <th style="padding:8px 10px;text-align:right">Tax Paid</th>
+                <th style="padding:8px 10px;text-align:center">Nature</th>
+              </tr></thead>
+              <tbody id="misSectionBody"></tbody>
+            </table>
+          </div>
+          <div style="font-weight:700;font-size:14px;margin-bottom:8px">Transaction Detail</div>
+          <div style="overflow-x:auto">
+            <table style="width:100%;border-collapse:collapse;font-size:11px">
+              <thead><tr style="background:var(--surface2)">
+                <th style="padding:7px 8px;text-align:left">Payment ID</th>
+                <th style="padding:7px 8px;text-align:left">WA Name</th>
+                <th style="padding:7px 8px;text-align:left">Section</th>
+                <th style="padding:7px 8px;text-align:left">Month</th>
+                <th style="padding:7px 8px;text-align:right">Taxable</th>
+                <th style="padding:7px 8px;text-align:right">Paid</th>
+                <th style="padding:7px 8px;text-align:center">Nature</th>
+                <th style="padding:7px 8px;text-align:center">Claimed</th>
+              </tr></thead>
+              <tbody id="misDetailBody"></tbody>
+            </table>
+          </div>
+        </div>
+        <div style="margin-top:20px;padding:12px;background:var(--surface2);border-radius:8px;font-size:12px;color:var(--muted)">
+          <strong style="color:var(--accent2)">Advisory:</strong> Adjustable WHT (s.168) credits against final tax. Final WHT (s.169) is a full &amp; final discharge. Advance tax (s.147) always adjustable. Verify figures against your CPR challan.
+        </div>
+      </div>
+    </div><!-- /tab-mis -->
+
     <!-- ── /Advisor Tools Tab ── -->
 
     <div class="tab-panel" id="tab-iris">
@@ -5804,6 +5903,454 @@ function _generatePDF() {
 
   doc.save("GoFiler_TaxReturn_" + (D.cnic || "TY2026") + ".pdf");
 }
+
+/* ══ MIS WHT REPORT ══ */
+const MIS_CODE_MAP = {
+  "64020001":{"s":"149","n":"adjustable","d":"Salary u/s 149 ATL rates"},
+  "64020002":{"s":"149","n":"adjustable","d":"Salary u/s 149 non-ATL rates"},
+  "64020003":{"s":"149","n":"adjustable","d":"Salary u/s 149 Director/CEO"},
+  "64020004":{"s":"149","n":"adjustable","d":"Salary u/s 149 Other"},
+  "64030001":{"s":"150","n":"adjustable","d":"Dividend u/s 150 @7.5% company filer"},
+  "64030002":{"s":"150","n":"adjustable","d":"Dividend u/s 150 @15% individual"},
+  "64030003":{"s":"150","n":"adjustable","d":"Dividend u/s 150 Bonus shares listed"},
+  "64030004":{"s":"150","n":"adjustable","d":"Dividend u/s 150 Modaraba"},
+  "64030055":{"s":"150","n":"final","d":"Dividend u/s 150 @25% non-filer Final"},
+  "64030056":{"s":"150","n":"final","d":"Dividend u/s 150 @35% Final"},
+  "64030057":{"s":"150","n":"final","d":"Dividend u/s 150 KSE listed Final"},
+  "64030058":{"s":"150","n":"final","d":"Dividend u/s 150 @10% Final"},
+  "64030059":{"s":"150","n":"final","d":"Dividend u/s 150 @12.5% Final"},
+  "64030060":{"s":"150","n":"final","d":"Dividend u/s 150 @15% company non-filer Final"},
+  "64030061":{"s":"150","n":"final","d":"Dividend u/s 150 @20% Final"},
+  "64030062":{"s":"150","n":"final","d":"Dividend u/s 150 @25% Final"},
+  "64030063":{"s":"150","n":"final","d":"Dividend u/s 150 @30% Final"},
+  "64030064":{"s":"150","n":"final","d":"Dividend u/s 150 @35% company Final"},
+  "64030065":{"s":"150","n":"final","d":"Dividend u/s 150 @40% Final"},
+  "64030066":{"s":"150","n":"final","d":"Dividend u/s 150 Unlisted Final"},
+  "64030067":{"s":"150","n":"final","d":"Dividend u/s 150 @50% Final"},
+  "64030068":{"s":"150","n":"final","d":"Dividend u/s 150 PTC Final"},
+  "64030069":{"s":"150","n":"final","d":"Dividend u/s 150 @5% mutual fund Final"},
+  "64030070":{"s":"150","n":"final","d":"Dividend u/s 150 @10% MF company Final"},
+  "64030071":{"s":"150","n":"final","d":"Dividend u/s 150 Insurance Final"},
+  "64030072":{"s":"150","n":"final","d":"Dividend u/s 150 @7.5% company Final"},
+  "64030073":{"s":"150","n":"final","d":"Dividend u/s 150 @15% non-ATL Final"},
+  "64030074":{"s":"150","n":"final","d":"Dividend u/s 150 @20% non-ATL Final"},
+  "64030075":{"s":"150","n":"final","d":"Dividend u/s 150 @25% non-ATL Final"},
+  "64030076":{"s":"150","n":"final","d":"Dividend u/s 150 @30% non-ATL Final"},
+  "64030077":{"s":"150","n":"final","d":"Dividend u/s 150 @35% non-ATL Final"},
+  "64030078":{"s":"150","n":"final","d":"Dividend u/s 150 @40% non-ATL Final"},
+  "64030079":{"s":"150","n":"final","d":"Dividend u/s 150 CSD Final"},
+  "64030080":{"s":"150A","n":"final","d":"SPV Sukuk u/s 150A @25%"},
+  "64030081":{"s":"150A","n":"final","d":"SPV Sukuk u/s 150A @15%"},
+  "64030082":{"s":"150A","n":"final","d":"SPV Sukuk u/s 150A @12.5%"},
+  "64030083":{"s":"150A","n":"final","d":"SPV Sukuk u/s 150A @10% individual"},
+  "64030084":{"s":"151(1A)","n":"final","d":"SPV Sukuk u/s 151(1A) @10%"},
+  "64030085":{"s":"151(1A)","n":"final","d":"SPV Sukuk u/s 151(1A) @12.5%"},
+  "64030086":{"s":"151(1A)","n":"final","d":"SPV Sukuk u/s 151(1A) @25%"},
+  "64030099":{"s":"150","n":"final","d":"Dividend Non-Resident ADTT u/s 150"},
+  "64330050":{"s":"150","n":"final","d":"Dividend from Debt Securities Mutual Funds"},
+  "64330073":{"s":"150","n":"final","d":"Dividend from Equities Mutual Funds"},
+  "64040051":{"s":"151","n":"final","d":"Profit on Debt NSC/PO Deposits u/s 151 Final"},
+  "64040052":{"s":"151","n":"final","d":"Profit on Debt Bank Accounts u/s 151 Final"},
+  "64040053":{"s":"151","n":"final","d":"Profit on Debt Govt Securities u/s 151 Final"},
+  "64040054":{"s":"151","n":"final","d":"Profit on Debt Others u/s 151 Final"},
+  "64040001":{"s":"151","n":"adjustable","d":"Profit on Debt NSC/PO Deposits u/s 151 Adj"},
+  "64040002":{"s":"151","n":"adjustable","d":"Profit on Debt Bank Accounts u/s 151 Adj"},
+  "64040003":{"s":"151","n":"adjustable","d":"Profit on Debt Govt Securities u/s 151 Adj"},
+  "64040004":{"s":"151","n":"adjustable","d":"Profit on Debt Others u/s 151 Adj"},
+  "64330072":{"s":"151A","n":"final","d":"Gain on pre-mature disposal of govt securities u/s 151A"},
+  "64050006":{"s":"152","n":"adjustable","d":"Advert Fee Non-Resident media u/s 152(1AAA)"},
+  "64050007":{"s":"152","n":"adjustable","d":"Goods/Services to Non-Resident u/s 152(2)"},
+  "64050008":{"s":"152","n":"adjustable","d":"Profit on Debt to Non-Resident u/s 152(2)"},
+  "64050009":{"s":"152","n":"adjustable","d":"Goods to PE of Non-Resident u/s 152(2A)(a)"},
+  "64050010":{"s":"152","n":"adjustable","d":"Transport Services to PE of Non-Resident u/s 152(2A)(b)"},
+  "64050011":{"s":"152","n":"adjustable","d":"Other Services to PE of Non-Resident u/s 152(2A)(b)"},
+  "64050012":{"s":"152","n":"adjustable","d":"Contracts to PE of Non-Resident u/s 152(2A)(c)"},
+  "64050013":{"s":"152","n":"adjustable","d":"Payment to Non-Resident Sports Person u/s 152"},
+  "64050014":{"s":"152","n":"adjustable","d":"Offshore digital services u/s 152(1C) ATL @5%"},
+  "64050018":{"s":"152","n":"adjustable","d":"Profit on Debt u/s 152(2) Adj"},
+  "64050050":{"s":"152","n":"final","d":"Capital gains on debt instruments Non-Resident u/s 152"},
+  "64050051":{"s":"152","n":"final","d":"Royalty/Fee for Technical Services Non-Resident u/s 152(1)"},
+  "64050052":{"s":"152","n":"final","d":"Construction Contracts Non-Resident u/s 152(1A)(a)"},
+  "64050053":{"s":"152","n":"final","d":"Services/Contracts Non-Resident u/s 152(1A)(b)"},
+  "64050054":{"s":"152","n":"final","d":"Advert Fee Non-Resident u/s 152(1A)(c)"},
+  "64050055":{"s":"152","n":"final","d":"Insurance Non-Resident u/s 152(1AA)"},
+  "64050056":{"s":"152","n":"final","d":"Advert Fee Non-Resident u/s 152(1AAA) Final"},
+  "64050057":{"s":"152","n":"final","d":"Offshore digital services Non-Resident u/s 152(1C) Final"},
+  "64050061":{"s":"152","n":"final","d":"Goods to PE of Non-Resident Final"},
+  "64050062":{"s":"152","n":"final","d":"Services to PE of Non-Resident Final"},
+  "64050063":{"s":"152","n":"final","d":"Contracts to PE of Non-Resident Final"},
+  "64050064":{"s":"152","n":"final","d":"Profit on Debt Non-Resident @10% u/s 152(2)"},
+  "64050066":{"s":"152","n":"final","d":"Goods to PE of Non-Resident Final"},
+  "64050067":{"s":"152","n":"final","d":"Advert Non-Resident u/s 152(1AAA) Final"},
+  "64050071":{"s":"152","n":"final","d":"Non-Resident Sports Person Final"},
+  "64050072":{"s":"152","n":"final","d":"Goods/Services to Non-Resident u/s 152(2) Final"},
+  "64050073":{"s":"152","n":"final","d":"Contracts to PE of Non-Resident u/s 152(4B) @1.4%"},
+  "64050077":{"s":"152","n":"final","d":"Return on Sukuk Non-Resident u/s 152(1DB)"},
+  "64050079":{"s":"152","n":"final","d":"Fee to card network/payment gateway u/s 152(1DD)"},
+  "64050096":{"s":"152","n":"final","d":"Profit on Debt Non-Resident u/s 152(2) 2nd Sch"},
+  "64050097":{"s":"152","n":"final","d":"Royalty/Fee Non-Resident ADTT"},
+  "64050098":{"s":"152","n":"final","d":"Goods/Services/Contracts Non-Resident ADTT"},
+  "64050099":{"s":"152","n":"final","d":"Profit on Debt Non-Resident ADTT"},
+  "64050100":{"s":"152A","n":"final","d":"Foreign commercials Non-Resident u/s 152A"},
+  "64050101":{"s":"DPPL","n":"final","d":"Foreign supply of goods"},
+  "64050102":{"s":"DPPL","n":"final","d":"Foreign supply of services"},
+  "64060002":{"s":"153","n":"adjustable","d":"Goods u/s 153(1)(a) ATL @1%"},
+  "64060003":{"s":"153","n":"adjustable","d":"Goods u/s 153(1)(a) ATL @1.5%"},
+  "64060004":{"s":"153","n":"adjustable","d":"Goods u/s 153(1)(a) ATL @2%"},
+  "64060005":{"s":"153","n":"adjustable","d":"Goods u/s 153(1)(a) ATL @2.5%"},
+  "64060006":{"s":"153","n":"adjustable","d":"Goods u/s 153(1)(a) @3%"},
+  "64060007":{"s":"153","n":"adjustable","d":"Goods u/s 153(1)(a) @3.5%"},
+  "64060008":{"s":"153","n":"adjustable","d":"Goods u/s 153(1)(a) ATL @4%"},
+  "64060009":{"s":"153","n":"adjustable","d":"Goods u/s 153(1)(a) ATL @4.5%"},
+  "64060010":{"s":"153","n":"adjustable","d":"Goods u/s 153(1)(a) @5% companies"},
+  "64060012":{"s":"153","n":"adjustable","d":"Goods u/s 153(1)(a) @6%"},
+  "64060014":{"s":"153","n":"adjustable","d":"Goods u/s 153(1)(a) @7%"},
+  "64060016":{"s":"153","n":"adjustable","d":"Goods u/s 153(1)(a) @8%"},
+  "64060018":{"s":"153","n":"adjustable","d":"Goods u/s 153(1)(a) @9%"},
+  "64060031":{"s":"153","n":"adjustable","d":"Goods u/s 153(1)(a) @7.75%"},
+  "64060032":{"s":"153","n":"adjustable","d":"Goods u/s 153(1)(a) @0.25%"},
+  "64060051":{"s":"153","n":"final","d":"Goods u/s 153(1)(a) ATL @0.5% Final"},
+  "64060052":{"s":"153","n":"final","d":"Goods u/s 153(1)(a) ATL @1% Final"},
+  "64060053":{"s":"153","n":"final","d":"Goods u/s 153(1)(a) ATL @1.5% Final"},
+  "64060054":{"s":"153","n":"final","d":"Goods u/s 153(1)(a) ATL @2% Final"},
+  "64060055":{"s":"153","n":"final","d":"Goods u/s 153(1)(a) ATL @2.5% Final"},
+  "64060058":{"s":"153","n":"final","d":"Goods u/s 153(1)(a) ATL @4% Final"},
+  "64060059":{"s":"153","n":"final","d":"Goods u/s 153(1)(a) ATL @4.5% Final"},
+  "64060060":{"s":"153","n":"final","d":"Goods u/s 153(1)(a) @5% companies Final"},
+  "64060062":{"s":"153","n":"final","d":"Goods u/s 153(1)(a) @6% Final"},
+  "64060064":{"s":"153","n":"final","d":"Goods u/s 153(1)(a) @7% Final"},
+  "64060066":{"s":"153","n":"final","d":"Goods u/s 153(1)(a) @8% Final"},
+  "64060068":{"s":"153","n":"final","d":"Goods u/s 153(1)(a) @9% Final"},
+  "64060081":{"s":"153","n":"final","d":"Goods u/s 153(1)(a) @7.75% Final"},
+  "64060082":{"s":"153","n":"final","d":"Goods u/s 153(1)(a) @0.25% Final"},
+  "64060083":{"s":"153","n":"final","d":"Goods u/s 153(1)(a) @5.5% Final"},
+  "64060084":{"s":"153","n":"final","d":"Goods u/s 153(1)(a) @11% Final"},
+  "64060102":{"s":"153","n":"adjustable","d":"Services u/s 153(1)(b) @1%"},
+  "64060104":{"s":"153","n":"adjustable","d":"Services u/s 153(1)(b) @2%"},
+  "64060106":{"s":"153","n":"adjustable","d":"Specified Services u/s 153(1)(b) ATL @3%"},
+  "64060116":{"s":"153","n":"adjustable","d":"Services u/s 153(1)(b) @8%"},
+  "64060124":{"s":"153","n":"adjustable","d":"Services u/s 153(1)(b) @12%"},
+  "64060130":{"s":"153","n":"adjustable","d":"Services u/s 153(1)(b) @15%"},
+  "64060206":{"s":"153","n":"adjustable","d":"Specified Services u/s 153(1)(b) @3%"},
+  "64060151":{"s":"153","n":"final","d":"Services u/s 153(1)(b) ATL @0.5% Final"},
+  "64060152":{"s":"153","n":"final","d":"Services u/s 153(1)(b) @1% Final"},
+  "64060153":{"s":"153","n":"final","d":"Media Advert Services u/s 153(1)(b) Final"},
+  "64060154":{"s":"153","n":"final","d":"Services u/s 153(1)(b) @2% Final"},
+  "64060156":{"s":"153","n":"final","d":"Services u/s 153(1)(b) @3% Final"},
+  "64060158":{"s":"153","n":"final","d":"IT Service u/s 153(1)(b) @4% Final"},
+  "64060162":{"s":"153","n":"final","d":"Specified Services u/s 153(1)(b) @6% Final"},
+  "64060166":{"s":"153","n":"final","d":"Services u/s 153(1)(b) ATL @8% Final"},
+  "64060168":{"s":"153","n":"final","d":"Services u/s 153(1)(b) @9% Final"},
+  "64060170":{"s":"153","n":"final","d":"Services u/s 153(1)(b) @10% Final"},
+  "64060172":{"s":"153","n":"final","d":"Services u/s 153(1)(b) @11% Final"},
+  "64060174":{"s":"153","n":"final","d":"Services u/s 153(1)(b) @12% Final"},
+  "64060179":{"s":"153","n":"final","d":"Services u/s 153(1)(b) @14.5% Final"},
+  "64060180":{"s":"153","n":"final","d":"Services u/s 153(1)(b) @15% Final"},
+  "64060185":{"s":"153","n":"final","d":"Services u/s 153(1)(b) @17.5% Final"},
+  "64060214":{"s":"153","n":"adjustable","d":"Contracts u/s 153(1)(c) ATL @7%"},
+  "64060215":{"s":"153","n":"adjustable","d":"Contracts u/s 153(1)(c) ATL @7.5% companies"},
+  "64060228":{"s":"153","n":"adjustable","d":"Contracts u/s 153(1)(c) @14%"},
+  "64060231":{"s":"153","n":"adjustable","d":"Export-related services u/s 153(2) ATL @1%"},
+  "64060232":{"s":"153B","n":"adjustable","d":"Royalty to residents u/s 153B ATL @15%"},
+  "64060256":{"s":"153","n":"final","d":"Contracts u/s 153(1)(c) ATL @3% Final"},
+  "64060263":{"s":"153","n":"final","d":"Contracts u/s 153(1)(c) ATL @6.5% Final"},
+  "64060264":{"s":"153","n":"final","d":"Contracts u/s 153(1)(c) ATL @7% Final"},
+  "64060265":{"s":"153","n":"final","d":"Contracts u/s 153(1)(c) ATL @7.5% Final"},
+  "64060270":{"s":"153","n":"final","d":"Contracts u/s 153(1)(c) ATL @10% Final"},
+  "64060274":{"s":"153","n":"final","d":"Contracts u/s 153(1)(c) @12% Final"},
+  "64060275":{"s":"153","n":"final","d":"Contracts u/s 153(1)(c) @12.5% Final"},
+  "64060278":{"s":"153","n":"final","d":"Contracts u/s 153(1)(c) @14% Final"},
+  "64060280":{"s":"153","n":"final","d":"Contracts u/s 153(1)(c) @15% Final"},
+  "64060286":{"s":"154A","n":"final","d":"IT/SW Exports PSEB registered u/s 154A Final"},
+  "64060287":{"s":"154A","n":"adjustable","d":"IT/SW Exports PSEB registered u/s 154A Adj"},
+  "64060288":{"s":"154A","n":"final","d":"IT/SW Exports not PSEB registered u/s 154A Final"},
+  "64060289":{"s":"154A","n":"adjustable","d":"IT/SW Exports not registered u/s 154A Adj"},
+  "64060352":{"s":"153","n":"final","d":"Export-related services u/s 153(2) Final"},
+  "64060556":{"s":"153","n":"final","d":"Specified Services u/s 153(1)(b) @3% Final"},
+  "64060557":{"s":"153","n":"final","d":"Goods via Digital means u/s 153(2A) @1%"},
+  "64060558":{"s":"153","n":"final","d":"Goods via Courier Service u/s 153(2A) @2%"},
+  "64062101":{"s":"153","n":"final","d":"Oil Tanker Services u/s 153(1)(b)"},
+  "64070054":{"s":"154","n":"final","d":"Export Proceeds u/s 154(1) @1%"},
+  "64070151":{"s":"154","n":"final","d":"Foreign Indenting Commission u/s 154(2) 5%"},
+  "64070152":{"s":"154","n":"final","d":"Sale proceeds of goods to exporter u/s 154(3)"},
+  "64070154":{"s":"154","n":"final","d":"Contract payments to indirect exporter u/s 154(3B)"},
+  "64070201":{"s":"154A","n":"adjustable","d":"Export of specified Services u/s 154A Adj"},
+  "64070202":{"s":"154A","n":"final","d":"Export of specified Services u/s 154A Final"},
+  "64080001":{"s":"155","n":"adjustable","d":"Rent of Immovable Property u/s 155"},
+  "64090051":{"s":"156","n":"final","d":"Prize Bond u/s 156 ATL @15%"},
+  "64090052":{"s":"156","n":"final","d":"Crossword Prize u/s 156 ATL @15%"},
+  "64090053":{"s":"156","n":"final","d":"Raffle Winnings u/s 156 ATL @20%"},
+  "64090054":{"s":"156","n":"final","d":"Lottery Winnings u/s 156 ATL @20%"},
+  "64090055":{"s":"156","n":"final","d":"Quiz Winnings u/s 156 ATL @20%"},
+  "64090056":{"s":"156","n":"final","d":"Sale Promotion Winnings u/s 156"},
+  "64090151":{"s":"156A","n":"final","d":"Petroleum Products Commission u/s 156A @12%"},
+  "64090201":{"s":"156B","n":"adjustable","d":"Withdrawal from Pension Fund u/s 156B"},
+  "64090202":{"s":"23A","n":"adjustable","d":"Withdrawal from Pension Fund 2nd Schedule"},
+  "64100101":{"s":"231AB","n":"adjustable","d":"Cash Withdrawal u/s 231AB"},
+  "64100201":{"s":"231AA","n":"adjustable","d":"Banking Transactions u/s 231AA Non-ATL @0.6%"},
+  "64100301":{"s":"231B","n":"adjustable","d":"Vehicle Registration 850cc u/s 231B(1)"},
+  "64100302":{"s":"231B","n":"adjustable","d":"Vehicle Transfer u/s 231B(2)"},
+  "64100303":{"s":"231B","n":"adjustable","d":"Vehicle Sale 850cc u/s 231B(3)"},
+  "64100304":{"s":"231B","n":"adjustable","d":"Vehicle Registration Non-ATL @4% u/s 231B(1A)"},
+  "64100305":{"s":"231B","n":"adjustable","d":"Vehicle Sale u/s 231B(2A)"},
+  "64100306":{"s":"231B","n":"adjustable","d":"Vehicle Registration u/s 231B(2A)"},
+  "64100307":{"s":"231B","n":"adjustable","d":"Vehicle Registration u/s 231B(2A)"},
+  "64100308":{"s":"231B","n":"adjustable","d":"Vehicle Transfer no engine cap u/s 231B(2)"},
+  "64100309":{"s":"231B","n":"adjustable","d":"Vehicle Sale no engine cap u/s 231B(3)"},
+  "64100310":{"s":"231B","n":"adjustable","d":"Vehicle Registration no engine cap u/s 231B(1)"},
+  "64100311":{"s":"231B","n":"adjustable","d":"Vehicle Registration 2001-2500cc u/s 231B(1)"},
+  "64100312":{"s":"231B","n":"adjustable","d":"Vehicle Registration 2501-3000cc u/s 231B(1)"},
+  "64100313":{"s":"231B","n":"adjustable","d":"Vehicle Registration 3000cc+ u/s 231B(1)"},
+  "64100314":{"s":"231B","n":"adjustable","d":"Vehicle Sale 2001-2500cc u/s 231B(3)"},
+  "64100315":{"s":"231B","n":"adjustable","d":"Vehicle Sale 2501-3000cc u/s 231B(3)"},
+  "64100316":{"s":"231B","n":"adjustable","d":"Vehicle Sale 3000cc+ u/s 231B(3)"},
+  "64100317":{"s":"231B","n":"adjustable","d":"Vehicle Registration 851-1000cc u/s 231B(1)"},
+  "64100318":{"s":"231B","n":"adjustable","d":"Vehicle Registration 1001-1300cc u/s 231B(1)"},
+  "64100319":{"s":"231B","n":"adjustable","d":"Vehicle Registration 1301-1600cc u/s 231B(1)"},
+  "64100320":{"s":"231B","n":"adjustable","d":"Vehicle Registration 1601-1800cc u/s 231B(1)"},
+  "64100321":{"s":"231B","n":"adjustable","d":"Vehicle Registration 1801-2000cc u/s 231B(1)"},
+  "64100322":{"s":"231B","n":"adjustable","d":"Vehicle Sale 851-1000cc u/s 231B(3)"},
+  "64100323":{"s":"231B","n":"adjustable","d":"Vehicle Sale 1001-1300cc u/s 231B(3)"},
+  "64100324":{"s":"231B","n":"adjustable","d":"Vehicle Sale 1301-1600cc u/s 231B(3)"},
+  "64100325":{"s":"231B","n":"adjustable","d":"Vehicle Sale 1601-1800cc u/s 231B(3)"},
+  "64100326":{"s":"231B","n":"adjustable","d":"Vehicle Sale 1801-2000cc u/s 231B(3)"},
+  "64120060":{"s":"233","n":"final","d":"Brokerage/Commission u/s 233 @5%"},
+  "64120066":{"s":"233","n":"final","d":"Brokerage/Commission Life ins u/s 233 @8%"},
+  "64120070":{"s":"233","n":"final","d":"Brokerage/Commission Adv Agencies u/s 233 @10%"},
+  "64120074":{"s":"233","n":"final","d":"Brokerage/Commission others u/s 233 @12%"},
+  "64120080":{"s":"233","n":"final","d":"Brokerage/Commission u/s 233 @15%"},
+  "64120082":{"s":"233","n":"final","d":"Brokerage/Commission u/s 233 @16%"},
+  "64120086":{"s":"233","n":"final","d":"Brokerage/Commission Advert Agents u/s 233(2A)"},
+  "64120101":{"s":"233A","n":"adjustable","d":"Stock Exchange shares traded @0.02% u/s 233A"},
+  "64120102":{"s":"233A","n":"adjustable","d":"Stock Exchange member value @0.02% u/s 233A"},
+  "64120103":{"s":"233A","n":"adjustable","d":"Stock Exchange member value u/s 233A(1)(c)"},
+  "64120201":{"s":"233AA","n":"adjustable","d":"Margin Financing u/s 233AA @10%"},
+  "64130001":{"s":"234","n":"adjustable","d":"Goods Transport Vehicle u/s 234"},
+  "64130002":{"s":"234","n":"adjustable","d":"Passenger Transport Non-AC u/s 234"},
+  "64130003":{"s":"234","n":"adjustable","d":"Private Vehicle Tax u/s 234"},
+  "64130004":{"s":"234","n":"adjustable","d":"Passenger Transport AC u/s 234"},
+  "64130151":{"s":"234A","n":"final","d":"CNG Station Gas Bill u/s 234A @4%"},
+  "64140001":{"s":"235","n":"adjustable","d":"Electricity Commercial Consumer u/s 235"},
+  "64140002":{"s":"235","n":"adjustable","d":"Electricity Industrial Consumer u/s 235"},
+  "64140051":{"s":"235","n":"final","d":"Electricity Commercial Consumer u/s 235 Final"},
+  "64140052":{"s":"235","n":"final","d":"Electricity Industrial Consumer u/s 235 Final"},
+  "64140101":{"s":"235A","n":"adjustable","d":"Electricity Domestic Consumer u/s 235A"},
+  "64140102":{"s":"235","n":"adjustable","d":"Electricity Domestic Non-ATL u/s 235"},
+  "64140152":{"s":"235","n":"final","d":"Electricity Domestic Non-ATL Final u/s 235"},
+  "64140201":{"s":"235B","n":"final","d":"Steel Melters/Re-Rollers u/s 235B"},
+  "64140251":{"s":"235","n":"final","d":"Electricity Steel melters composite u/s 235"},
+  "64150001":{"s":"236","n":"adjustable","d":"Telephone Bill u/s 236(1)(a)"},
+  "64150002":{"s":"236","n":"adjustable","d":"Cell Phone Bill u/s 236(1)(a) @15%"},
+  "64150003":{"s":"236","n":"adjustable","d":"Prepaid Telephone Card u/s 236(1)(b) @15%"},
+  "64150004":{"s":"236","n":"adjustable","d":"Phone Unit u/s 236(1)(c) @15%"},
+  "64150005":{"s":"236","n":"adjustable","d":"Internet Bill u/s 236(1)(d) @15%"},
+  "64150006":{"s":"236","n":"adjustable","d":"Prepaid Internet Card u/s 236(1)(e) @15%"},
+  "64150101":{"s":"236A","n":"adjustable","d":"Purchase by Auction u/s 236A ATL @10%"},
+  "64150102":{"s":"236A","n":"final","d":"Purchase by Auction Final u/s 236A(3)"},
+  "64150103":{"s":"236A","n":"adjustable","d":"Purchase by Auction immovable property u/s 236A"},
+  "64150104":{"s":"236A","n":"final","d":"Purchase by Auction u/s 236A(1) ATL @3% Final"},
+  "64150201":{"s":"236B","n":"adjustable","d":"Domestic Air Ticket u/s 236B @5%"},
+  "64150301":{"s":"236C","n":"adjustable","d":"Sale/Transfer of Immovable Property u/s 236C"},
+  "64150401":{"s":"236D","n":"adjustable","d":"Functions/Gatherings u/s 236D"},
+  "64150402":{"s":"236D","n":"adjustable","d":"Marriage Functions u/s 236D"},
+  "64150403":{"s":"236D","n":"adjustable","d":"Marriage Functions u/s 236D"},
+  "64150404":{"s":"236D","n":"adjustable","d":"Marriage Functions u/s 236D"},
+  "64150405":{"s":"236D","n":"adjustable","d":"Marriage Functions u/s 236D"},
+  "64150407":{"s":"236CB","n":"adjustable","d":"Functions u/s 236CB ATL @10%"},
+  "64150501":{"s":"236E","n":"adjustable","d":"Foreign TV Play Single u/s 236E"},
+  "64150502":{"s":"236E","n":"adjustable","d":"Foreign TV Drama Serial u/s 236E"},
+  "64150503":{"s":"236CA","n":"final","d":"Foreign TV Drama Serial u/s 236CA Final"},
+  "64150504":{"s":"236CA","n":"final","d":"Foreign TV Play Single u/s 236CA Final"},
+  "64150505":{"s":"236CA","n":"final","d":"Advertisement Foreign Actor u/s 236CA Final"},
+  "64150601":{"s":"236F","n":"adjustable","d":"License to Cable Operators u/s 236F"},
+  "64150602":{"s":"236F","n":"adjustable","d":"Renewal Cable Operators u/s 236F"},
+  "64150603":{"s":"236F","n":"adjustable","d":"License IPTV/FM u/s 236F"},
+  "64150604":{"s":"236F","n":"adjustable","d":"Renewal IPTV/FM u/s 236F"},
+  "64150701":{"s":"236G","n":"adjustable","d":"Purchase by Distributors u/s 236G"},
+  "64150702":{"s":"236G","n":"adjustable","d":"Purchase of Fertilizer by Distributors u/s 236G"},
+  "64150802":{"s":"236H","n":"adjustable","d":"Purchase by Retailers Electronics u/s 236H @1%"},
+  "64150803":{"s":"236H","n":"adjustable","d":"Purchase by Retailers u/s 236H @0.5%"},
+  "64150901":{"s":"236I","n":"adjustable","d":"Educational Institution Fee u/s 236I Non-ATL @5%"},
+  "64151001":{"s":"236J","n":"adjustable","d":"License to Dealers/Commission Agents u/s 236J"},
+  "64151101":{"s":"236K","n":"adjustable","d":"Purchase/Transfer of Immovable Property u/s 236K"},
+  "64151201":{"s":"236L","n":"adjustable","d":"International Air Ticket u/s 236L"},
+  "64151351":{"s":"236Z","n":"final","d":"Bonus Shares by listed companies u/s 236Z @10%"},
+  "64151451":{"s":"236N","n":"final","d":"Bonus Shares by unlisted companies u/s 236N"},
+  "64151501":{"s":"236P","n":"adjustable","d":"Banking Transactions Non-ATL @0.6% u/s 236P"},
+  "64151651":{"s":"236Q","n":"final","d":"Industrial/commercial equipment use fee u/s 236Q @10%"},
+  "64151653":{"s":"236HA","n":"final","d":"Petroleum products sale u/s 236HA"},
+  "64151701":{"s":"236R","n":"adjustable","d":"Education expenses remitted abroad u/s 236R"},
+  "64151801":{"s":"236S","n":"adjustable","d":"Dividend in specie u/s 236S @15%"},
+  "64151802":{"s":"236S","n":"adjustable","d":"Dividend in specie u/s 236S @7.5%"},
+  "64151901":{"s":"236T","n":"adjustable","d":"Future commodity contracts u/s 236T"},
+  "64151902":{"s":"236U","n":"adjustable","d":"General insurance premium u/s 236U Non-ATL @4%"},
+  "64151903":{"s":"236U","n":"adjustable","d":"Life insurance premium u/s 236U Non-ATL @1%"},
+  "64151904":{"s":"236V","n":"adjustable","d":"Insurance premium u/s 236V"},
+  "64151905":{"s":"236Y","n":"adjustable","d":"Foreign Remittance via card u/s 236Y ATL @1%"},
+  "64151906":{"s":"236Y","n":"adjustable","d":"Amounts remitted abroad via card u/s 236Y"},
+  "64151907":{"s":"231C","n":"adjustable","d":"Advance tax on foreign domestic workers u/s 231C"},
+  "64152101":{"s":"236X","n":"adjustable","d":"Advance tax on tobacco u/s 236X"},
+  "64220053":{"s":"37","n":"final","d":"Capital Gains Immovable Property @5% u/s 37(1A)"},
+  "64220055":{"s":"37","n":"final","d":"Capital Gains Immovable Property @10% u/s 37(1A)"},
+  "64220156":{"s":"37A","n":"final","d":"Capital Gains on Securities @12.5% u/s 37A"},
+  "64220155":{"s":"37A","n":"final","d":"Capital Gains on Securities @10% u/s 37A"},
+  "64220160":{"s":"37","n":"adjustable","d":"WHT on Sale Consideration u/s 37(6)"},
+  "64220199":{"s":"37A","n":"final","d":"Capital Gains on Securities corporate rate u/s 37A"},
+  "64240051":{"s":"143","n":"final","d":"Non-Resident Ship Owner/Charterer u/s 143"},
+  "64250051":{"s":"144","n":"final","d":"Non-Resident Aircraft Owner/Charterer u/s 144"},
+  "64310057":{"s":"7C","n":"advance","d":"Advance tax Builders u/s 7C @5%"},
+  "64310058":{"s":"7D","n":"advance","d":"Advance tax Developers u/s 7D @5%"},
+  "64310059":{"s":"7C","n":"final","d":"Income tax paid by builders u/s 7C"},
+  "64310060":{"s":"7D","n":"final","d":"Income tax paid by developers u/s 7D"},
+  "64330068":{"s":"37A","n":"final","d":"Capital Gains on Securities @12.5% from Jul 2024"},
+  "64330069":{"s":"37A","n":"final","d":"Capital Gains on Securities @15% u/s 37A"},
+  "64330070":{"s":"37A","n":"final","d":"Capital Gains on Securities @5% u/s 37A"},
+  "923151":{"s":"113","n":"final","d":"Minimum tax @0.1% u/s 113"},
+  "9202":{"s":"147","n":"advance","d":"Advance Tax u/s 147"},
+  "92021":{"s":"147","n":"advance","d":"Advance Tax 1st instalment u/s 147"},
+  "92022":{"s":"147","n":"advance","d":"Advance Tax 2nd instalment u/s 147"},
+  "9203":{"s":"137","n":"admitted","d":"Admitted Tax u/s 137(1)"},
+  "9204":{"s":"137","n":"admitted","d":"Demanded Tax u/s 137(2)"}
+};
+let _misAllEntries=[];
+function misDragOver(e){e.preventDefault();document.getElementById('misDropZone').classList.add('dragover');}
+function misDragLeave(e){document.getElementById('misDropZone').classList.remove('dragover');}
+function misDrop(e){e.preventDefault();misDragLeave(e);if(e.dataTransfer.files[0])misHandleFile(e.dataTransfer.files[0]);}
+function misFileSelected(inp){if(inp.files[0])misHandleFile(inp.files[0]);}
+function misHandleFile(file){
+  var ext=file.name.split('.').pop().toLowerCase();
+  if(ext!=='xls'&&ext!=='xlsx'){misShowError('Unsupported format. Use .xls or .xlsx from FBR IRIS MIS Report.');return;}
+  var reader=new FileReader();
+  reader.onload=function(ev){
+    try{
+      var wb=XLSX.read(new Uint8Array(ev.target.result),{type:'array'});
+      var ws=wb.Sheets[wb.SheetNames[0]];
+      var rows=XLSX.utils.sheet_to_json(ws,{defval:''});
+      if(!rows.length){misShowError('No data found. Verify this is an FBR MIS report.');return;}
+      var get=function(r){var keys=Array.prototype.slice.call(arguments,1);for(var i=0;i<keys.length;i++){var v=r[keys[i]];if(v!==undefined&&v!=='')return String(v);}return '';};
+      var getNum=function(r){var v=get.apply(null,arguments);return parseFloat(String(v).replace(/,/g,''))||0;};
+      _misAllEntries=rows.map(function(r){
+        var paymentId=get(r,'Payment Id','Payment ID','PaymentId');
+        var waName=get(r,'Wa Name','WA Name','Withholding Agent Name');
+        var sectionRaw=get(r,'Section','SECTION');
+        var taxMonth=get(r,'Tax Month','TaxMonth');
+        var taxYear=get(r,'Tax Year','TaxYear');
+        var taxableAmt=getNum(r,'Taxable Amount','TaxableAmount');
+        var paidAmt=getNum(r,'Paid Amount','PaidAmount');
+        var claimed=get(r,'Claimed','CLAIMED').toUpperCase();
+        var m=sectionRaw.trim().match(/^(\S+?)\s*-\s*(.*)/);
+        var code=m?m[1].trim():sectionRaw.trim();
+        var descRaw=m?m[2].trim():sectionRaw.trim();
+        var info=MIS_CODE_MAP[code]||null;
+        return{paymentId:paymentId,waName:waName,code:code,
+          section:info?info.s:code,desc:info?info.d:descRaw,
+          taxMonth:taxMonth,taxYear:taxYear,taxableAmt:taxableAmt,
+          paidAmt:paidAmt,claimed:claimed,nature:info?info.n:'unknown'};
+      }).filter(function(r){return r.code&&(r.taxableAmt>0||r.paidAmt>0||r.paymentId);});
+      if(!_misAllEntries.length){misShowError('No valid WHT entries found.');return;}
+      D.misEntries=_misAllEntries;
+      document.getElementById('misError').style.display='none';
+      document.getElementById('misResults').style.display='block';
+      misRender();
+    }catch(err){misShowError('Error: '+err.message);}
+  };
+  reader.readAsArrayBuffer(file);
+}
+function misGetFiltered(){
+  var yr=document.getElementById('misTaxYearFilter').value;
+  if(yr==='all')return _misAllEntries;
+  return _misAllEntries.filter(function(r){
+    if(String(r.taxYear).trim()===yr)return true;
+    var m=String(r.taxMonth).match(/\b(20\d\d)\b/);
+    var ny=m?parseInt(m[1]):0;
+    var ts=parseInt(yr)-1;
+    if(ny===parseInt(yr))return true;
+    if(ny===ts){var mon=String(r.taxMonth).match(/\b(0?[1-9]|1[0-2])\b/);return mon?parseInt(mon[1])>=7:false;}
+    return false;
+  });
+}
+function misRender(){
+  var entries=misGetFiltered();
+  var adjTotal=0,finalTotal=0,advTotal=0;
+  var sections={};
+  entries.forEach(function(r){
+    if(r.nature==='adjustable')adjTotal+=r.paidAmt;
+    else if(r.nature==='final')finalTotal+=r.paidAmt;
+    else if(r.nature==='advance')advTotal+=r.paidAmt;
+    if(!sections[r.code])sections[r.code]={section:r.section,desc:r.desc,nature:r.nature,taxable:0,paid:0};
+    sections[r.code].taxable+=r.taxableAmt;
+    sections[r.code].paid+=r.paidAmt;
+  });
+  document.getElementById('misAdjTotal').textContent='Rs '+_fmt(adjTotal);
+  document.getElementById('misFinalTotal').textContent='Rs '+_fmt(finalTotal);
+  document.getElementById('misAdvTotal').textContent='Rs '+_fmt(advTotal);
+  document.getElementById('misTotalCount').textContent=entries.length;
+  var secRows=Object.values(sections).sort(function(a,b){return b.paid-a.paid;});
+  document.getElementById('misSectionBody').innerHTML=secRows.map(function(s){
+    return '<tr><td style="font-weight:700;font-size:12px;color:var(--accent2)">'+s.section+'</td><td style="font-size:12px">'+s.desc+'</td><td style="text-align:right;font-size:12px">'+_fmt(s.taxable)+'</td><td style="text-align:right;font-size:12px;font-weight:700">'+_fmt(s.paid)+'</td><td style="text-align:center">'+_misNatureBadge(s.nature)+'</td></tr>';
+  }).join('')||'<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:16px">No entries for selected year</td></tr>';
+  document.getElementById('misDetailBody').innerHTML=entries.map(function(r){
+    var clm=r.claimed==='YES'?'<span style="color:#34d399;font-weight:700">YES</span>':'<span style="color:#6b7280">-</span>';
+    return '<tr><td style="font-size:11px;color:var(--muted)">'+r.paymentId+'</td><td style="font-size:12px;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+r.waName+'">'+r.waName+'</td><td style="font-size:11px;font-weight:700;color:var(--accent2)">'+r.section+'</td><td style="font-size:11px">'+r.taxMonth+'</td><td style="text-align:right;font-size:12px">'+_fmt(r.taxableAmt)+'</td><td style="text-align:right;font-size:12px;font-weight:700">'+_fmt(r.paidAmt)+'</td><td style="text-align:center">'+_misNatureBadge(r.nature)+'</td><td style="text-align:center">'+clm+'</td></tr>';
+  }).join('');
+  D.misAdjustableWHT=adjTotal+advTotal;
+  D.misFinalWHT=finalTotal;
+}
+function _misNatureBadge(n){
+  if(n==='adjustable')return '<span style="font-size:10px;background:rgba(16,185,129,.2);color:#34d399;padding:2px 7px;border-radius:4px;font-weight:700">Adj</span>';
+  if(n==='final')return '<span style="font-size:10px;background:rgba(245,158,11,.2);color:#fbbf24;padding:2px 7px;border-radius:4px;font-weight:700">Final</span>';
+  if(n==='advance')return '<span style="font-size:10px;background:rgba(99,102,241,.2);color:#a5b4fc;padding:2px 7px;border-radius:4px;font-weight:700">Adv</span>';
+  if(n==='admitted')return '<span style="font-size:10px;background:rgba(156,163,175,.15);color:#9ca3af;padding:2px 7px;border-radius:4px;font-weight:700">Paid</span>';
+  return '<span style="font-size:10px;background:rgba(239,68,68,.15);color:#fca5a5;padding:2px 7px;border-radius:4px;font-weight:700">Check</span>';
+}
+function misApplyToReturn(){
+  var entries=misGetFiltered();
+  var phone=0,elec=0,vehicle=0,propBuy=0,propSell=0,salary=0,rent=0,profit=0,dividend=0,other=0;
+  entries.forEach(function(r){
+    if(r.nature!=='adjustable'&&r.nature!=='advance')return;
+    var s=r.section;
+    if(s==='149')salary+=r.paidAmt;
+    else if(s==='155')rent+=r.paidAmt;
+    else if(s==='151'||s==='151A')profit+=r.paidAmt;
+    else if(s==='150'&&r.nature==='adjustable')dividend+=r.paidAmt;
+    else if(s==='236')phone+=r.paidAmt;
+    else if(s==='235'||s==='235A')elec+=r.paidAmt;
+    else if(s==='231B'||s==='234')vehicle+=r.paidAmt;
+    else if(s==='236K')propBuy+=r.paidAmt;
+    else if(s==='236C')propSell+=r.paidAmt;
+    else other+=r.paidAmt;
+  });
+  var setF=function(id,v){if(v>0){var el=document.getElementById(id);if(el){el.value=v;if(D.hasOwnProperty(id))D[id]=v;}}};
+  setF('taxDeductedSalary',salary);setF('taxDeductedRent',rent);setF('taxDeductedProfit',profit);
+  setF('taxDeductedDividend',dividend);setF('taxPhone',phone);setF('taxElectricity',elec);
+  setF('taxVehicle',vehicle);setF('taxPropertyPurchase',propBuy);setF('taxPropertySale',propSell);
+  if(other>0){var el=document.getElementById('taxOtherAdjustable');if(el){el.value=(parseFloat(el.value)||0)+other;D.taxOtherAdjustable=parseFloat(el.value);}}
+  D.misAdjustableWHT=entries.filter(function(r){return r.nature==='adjustable'||r.nature==='advance';}).reduce(function(s,r){return s+r.paidAmt;},0);
+  var lines=[];
+  if(salary)lines.push('Salary: Rs '+_fmt(salary));
+  if(rent)lines.push('Rent: Rs '+_fmt(rent));
+  if(profit)lines.push('Profit-on-Debt: Rs '+_fmt(profit));
+  if(phone)lines.push('Phone: Rs '+_fmt(phone));
+  if(elec)lines.push('Electricity: Rs '+_fmt(elec));
+  if(vehicle)lines.push('Vehicle: Rs '+_fmt(vehicle));
+  if(propBuy)lines.push('Property Buy: Rs '+_fmt(propBuy));
+  if(propSell)lines.push('Property Sell: Rs '+_fmt(propSell));
+  if(other)lines.push('Other: Rs '+_fmt(other));
+  var st=document.getElementById('misApplyStatus');
+  st.style.display='block';
+  st.textContent=lines.length?'Applied: '+lines.join(' | '):'No adjustable entries found.';
+  setTimeout(function(){st.style.display='none';},6000);
+}
+function misShowError(msg){var el=document.getElementById('misError');el.textContent=msg;el.style.display='block';}
+function misReset(){
+  _misAllEntries=[];D.misEntries=[];D.misAdjustableWHT=0;D.misFinalWHT=0;
+  document.getElementById('misResults').style.display='none';
+  var fi=document.getElementById('misFileInput');if(fi)fi.value='';
+  document.getElementById('misSectionBody').innerHTML='';
+  document.getElementById('misDetailBody').innerHTML='';
+}
+/* end MIS */
+
 </script>
 
 <!-- ══════════════════════════════════════════
