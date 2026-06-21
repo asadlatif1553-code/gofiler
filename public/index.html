@@ -6227,6 +6227,8 @@ function misHandleFile(file){
       var ws=wb.Sheets[wb.SheetNames[0]];
       var rows=XLSX.utils.sheet_to_json(ws,{defval:''});
       if(!rows.length){misShowError('No data found. Verify this is an FBR MIS report.');return;}
+      // Normalize column headers: trim whitespace so "Tax Year " matches "Tax Year"
+      rows=rows.map(function(r){var n={};Object.keys(r).forEach(function(k){n[k.trim()]=r[k];});return n;});
       var get=function(r){var keys=Array.prototype.slice.call(arguments,1);for(var i=0;i<keys.length;i++){var v=r[keys[i]];if(v!==undefined&&v!=='')return String(v);}return '';};
       var getNum=function(r){var v=get.apply(null,arguments);return parseFloat(String(v).replace(/,/g,''))||0;};
       _misAllEntries=rows.map(function(r){
