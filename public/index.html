@@ -4372,10 +4372,10 @@ async function loginUser() {
     }
   } catch(e) {
     const code = e.code || "";
-    if (code === "auth/user-not-found" || code === "auth/invalid-credential" || code === "auth/invalid-email") {
+    if (code === "auth/user-not-found") {
       errEl.textContent = "Account not found. Please create one below.";
-    } else if (code === "auth/wrong-password") {
-      errEl.textContent = "Incorrect PIN.";
+    } else if (code === "auth/wrong-password" || code === "auth/invalid-credential") {
+      errEl.textContent = "Incorrect email/CNIC or PIN. Please try again.";
     } else if (code === "auth/network-request-failed") {
       errEl.textContent = "No internet connection. Please connect and try again.";
     } else if (code === "auth/too-many-requests") {
