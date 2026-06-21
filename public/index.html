@@ -35,6 +35,21 @@
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 <script>
+// ── SW Emergency Eviction (runs immediately, before anything else) ──
+// If the browser is running any GoFiler SW older than v21, nuke it instantly.
+(async function() {
+  if (!("serviceWorker" in navigator) || !("caches" in window)) return;
+  try {
+    const keys = await caches.keys();
+    const stale = keys.filter(k => { const m = k.match(/gofiler-v(\d+)/); return m && +m[1] < 21; });
+    if (!stale.length) return;
+    const regs = await navigator.serviceWorker.getRegistrations();
+    await Promise.all([...stale.map(k => caches.delete(k)), ...regs.map(r => r.unregister())]);
+    window.location.replace(window.location.href); // reload without SW
+  } catch(e) { console.warn("SW eviction error:", e); }
+})();
+</script>
+<script>
 const firebaseConfig = {
   apiKey: "AIzaSyBNuFA1LBm8DmO0vg-xIHmLnHT-5sSppT4",
   authDomain: "gofiler.firebaseapp.com",
