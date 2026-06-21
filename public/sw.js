@@ -4,7 +4,7 @@
  * Does NOT cache external CDN or WebLLM model files (they manage their own cache).
  */
 
-const CACHE_NAME   = "gofiler-v22";
+const CACHE_NAME   = "gofiler-v23";
 const OFFLINE_URL  = "/index.html";
 const SHELL_ASSETS = [
   "/",

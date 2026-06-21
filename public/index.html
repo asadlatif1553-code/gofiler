@@ -2665,17 +2665,23 @@ if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("/sw.js")
       .then(reg => {
         console.log("GoFiler SW registered:", reg.scope);
-        // Notify SW to skip waiting if a new version is found
+        // Auto-reload when a new SW version activates
         reg.addEventListener("updatefound", () => {
           const newSW = reg.installing;
           newSW.addEventListener("statechange", () => {
-            if (newSW.state === "installed" && navigator.serviceWorker.controller) {
-              toast("App updated — reload to get the latest version.");
+            if (newSW.state === "activated") {
+              // New SW took over — reload to serve fresh files
+              window.location.reload();
             }
           });
         });
       })
       .catch(err => console.warn("SW registration failed:", err));
+
+    // Also reload if a different SW takes control mid-session
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+      window.location.reload();
+    });
   });
 }
 
