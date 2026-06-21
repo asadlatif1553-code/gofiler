@@ -6240,6 +6240,7 @@ function misHandleFile(file){
         var taxableAmt=getNum(r,'Taxable Amount','TaxableAmount');
         var paidAmt=getNum(r,'Paid Amount','PaidAmount');
         var claimed=get(r,'Claimed','CLAIMED').toUpperCase();
+        var paymentSource=get(r,'Payment Source','PaymentSource');
         var m=sectionRaw.trim().match(/^(\S+?)\s*-\s*(.*)/);
         var code=m?m[1].trim():sectionRaw.trim();
         var descRaw=m?m[2].trim():sectionRaw.trim();
@@ -6247,8 +6248,8 @@ function misHandleFile(file){
         return{paymentId:paymentId,waName:waName,code:code,
           section:info?info.s:code,desc:info?info.d:descRaw,
           taxMonth:taxMonth,taxYear:taxYear,taxableAmt:taxableAmt,
-          paidAmt:paidAmt,claimed:claimed,nature:info?info.n:'unknown'};
-      }).filter(function(r){return r.code&&(r.taxableAmt>0||r.paidAmt>0||r.paymentId);});
+          paidAmt:paidAmt,claimed:claimed,paymentSource:paymentSource,nature:info?info.n:'unknown'};
+      }).filter(function(r){return r.code&&(r.taxableAmt>0||r.paidAmt>0||r.paymentId)&&r.paymentSource.toLowerCase()==='withholdee';});
       if(!_misAllEntries.length){misShowError('No valid WHT entries found.');return;}
       D.misEntries=_misAllEntries;
       document.getElementById('misError').style.display='none';
