@@ -1242,7 +1242,15 @@ input[type=range].ps::-moz-range-thumb{width:18px;height:18px;border-radius:50%;
             <tr><td>Cash withdrawal (per transaction &gt; Rs 50,000)</td><td>231A</td><td class="rate-filer">0%</td><td class="rate-non">0.6%</td><td class="rate-diff">+0.6 pts</td></tr>
             <tr><td>Property purchase (immovable)</td><td>236K</td><td class="rate-filer">3%</td><td class="rate-non">6%</td><td class="rate-diff">+3 pts</td></tr>
             <tr><td>Property sale (immovable)</td><td>236C</td><td class="rate-filer">3%</td><td class="rate-non">6%</td><td class="rate-diff">+3 pts</td></tr>
-            <tr><td>Services / contracts</td><td>153</td><td class="rate-filer">10%</td><td class="rate-non">20%</td><td class="rate-diff">+10 pts</td></tr>
+            <tr><td>Services — IT/IT-enabled (s.153(1)(b))</td><td>153</td><td class="rate-filer">4%</td><td class="rate-non">17.5%</td><td class="rate-diff">+13.5 pts</td></tr>
+            <tr><td>Services — Other specified (transport, hotel, security, etc.)</td><td>153</td><td class="rate-filer">6%</td><td class="rate-non">17.5%</td><td class="rate-diff">+11.5 pts</td></tr>
+            <tr><td>Services — General / Other</td><td>153</td><td class="rate-filer">15%</td><td class="rate-non">17.5%</td><td class="rate-diff">+2.5 pts</td></tr>
+            <tr><td>Goods supply (company)</td><td>153(1)(a)</td><td class="rate-filer">5%</td><td class="rate-non">5%</td><td class="rate-diff">Same</td></tr>
+            <tr><td>Goods supply (non-company)</td><td>153(1)(a)</td><td class="rate-filer">5.5%</td><td class="rate-non">5.5%</td><td class="rate-diff">Same</td></tr>
+            <tr><td>Contracts (company)</td><td>153(1)(c)</td><td class="rate-filer">7.5%</td><td class="rate-non">7.5%</td><td class="rate-diff">Same</td></tr>
+            <tr><td>Contracts (non-company)</td><td>153(1)(c)</td><td class="rate-filer">8%</td><td class="rate-non">8%</td><td class="rate-diff">Same</td></tr>
+            <tr><td>IT/SW Exports — PSEB registered (Final Tax)</td><td>154A</td><td class="rate-filer">0.25%</td><td class="rate-non">0.25%</td><td class="rate-diff">Same</td></tr>
+            <tr><td>IT/SW Exports — Non-PSEB (Final Tax)</td><td>154A</td><td class="rate-filer">1%</td><td class="rate-non">1%</td><td class="rate-diff">Same</td></tr>
             <tr><td>Commission income</td><td>233</td><td class="rate-filer">12%</td><td class="rate-non">20%</td><td class="rate-diff">+8 pts</td></tr>
             <tr><td>Vehicle registration (1001–1800cc)</td><td>231B</td><td class="rate-filer">Rs 10,000</td><td class="rate-non">Rs 25,000</td><td class="rate-diff">+Rs 15,000</td></tr>
             <tr><td>Vehicle registration (1801–2500cc)</td><td>231B</td><td class="rate-filer">Rs 25,000</td><td class="rate-non">Rs 75,000</td><td class="rate-diff">+Rs 50,000</td></tr>
@@ -1654,7 +1662,7 @@ input[type=range].ps::-moz-range-thumb{width:18px;height:18px;border-radius:50%;
 
           <!-- Final Tax group -->
           <div class="wht-row" style="border-top:1px dashed rgba(251,191,36,.2);margin-top:2px;padding-top:9px">
-            <span class="wht-sec">154A</span><span class="wht-nat">IT/SW Exports (PSEB reg.)</span><span class="wht-rate">1%</span>
+            <span class="wht-sec">154A</span><span class="wht-nat">IT/SW Exports (PSEB: 0.25% / Non-PSEB: 1%)</span><span class="wht-rate">0.25%/1%</span>
             <input type="number" class="wht-inp" id="wht_154a_rec" placeholder="0" min="0" oninput="calcWHTRegister()">
             <input type="number" class="wht-inp" id="wht_154a_wht" placeholder="0" min="0" oninput="calcWHTRegister()">
             <span class="wht-badge wht-final">🏁 Final Tax</span>
@@ -1716,7 +1724,7 @@ input[type=range].ps::-moz-range-thumb{width:18px;height:18px;border-radius:50%;
           </div>
         </div>
 
-        <div class="adv-note">📌 <strong>Finance Act 2019:</strong> s.153 WHT (goods/services/contracts) and s.154 export WHT changed from <em>Final Tax</em> to <em>Minimum Tax</em>. s.154A IT/software exports remain Final Tax per s.169. Exception: manufacturer of goods / listed co. → s.153(1)(a) goods WHT is <em>Adjustable</em> (toggle above). In IRIS: min-tax receipts → Annex-D; final tax → Annex-C.</div>
+        <div class="adv-note">📌 <strong>TY2026 Rates (Finance Act 2025):</strong> s.153(1)(a) Goods: 5% (company), 5.5% (non-company). s.153(1)(b) Services: IT/IT-enabled <strong>4%</strong>; other specified services (transport, hotel, security etc.) <strong>6%</strong>; general services <strong>15%</strong>. s.153(1)(c) Contracts: company <strong>7.5%</strong>, non-company <strong>8%</strong>. s.154 Exports: <strong>1%</strong> (Minimum Tax). s.154A IT/SW Exports: PSEB registered <strong>0.25%</strong>, non-PSEB <strong>1%</strong> — <em>Final Tax per s.169</em> (taxpayer may opt out u/s 154A(3) at time of filing). s.153/154 = Minimum Tax (not final); Exception: manufacturer → s.153(1)(a) goods WHT is Adjustable (toggle above). IRIS: min-tax receipts → Annex-D; final tax (s.154A/156/156A) → Annex-C.</div>
       </div>
 
       <!-- Minimum Tax u/s 113 -->
@@ -1757,7 +1765,7 @@ input[type=range].ps::-moz-range-thumb{width:18px;height:18px;border-radius:50%;
       <!-- Final Tax Register -->
       <div class="adv-section">
         <div class="adv-section-title">📋 Final Tax Register <span class="adv-badge">s.169</span></div>
-        <p style="font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.6">Income heads under <strong>Final Tax Regime per s.169</strong> are fully settled at source. Excluded from normal slab. Declare in <strong>Annex-C</strong> of Form 114 on IRIS — no further tax or refund. Pulls from your return data.</p>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.6">Income heads under <strong>Final Tax Regime per s.169</strong> are fully settled at source — excluded from normal slab, no additional tax or refund. Declare in <strong>Annex-C</strong> of Form 114 on IRIS. <strong>s.154A note:</strong> PSEB-registered IT exporters pay <strong>0.25%</strong>; non-PSEB pay <strong>1%</strong>. The taxpayer may opt out of FTR under s.154A(3) at time of filing if normal tax is more favourable — conditions: all returns filed, no credit for foreign taxes. Use the MIS WHT tab → Apply to Return to auto-populate below.</p>
         <button class="adv-compute-btn" onclick="calcFinalTax()">📋 Generate Final Tax Register</button>
         <div class="adv-result-box" id="finalTaxResult" style="display:none">
           <div class="adv-result-row" style="font-size:11px;font-weight:700;color:var(--muted);padding-bottom:8px"><span>Income Head</span><span>Section</span><span>Rate</span><span>Tax Paid / Regime</span></div>
@@ -3963,7 +3971,7 @@ function generateIRIS() {
     let ftRows = "";
     ftRows += subhdr("Final Tax Income — excluded from normal income computation");
     if (wr.finalRec154a > 0)
-      ftRows += row("AnnexC-154A", "IT/SW Export Receipts u/s 154A (1% WHT = Final Tax)", rs(wr.finalRec154a) + "  [WHT: " + rs(wr.finalWHT) + "]");
+      ftRows += row("AnnexC-154A", "IT/SW Export Receipts u/s 154A (PSEB: 0.25% / Non-PSEB: 1% — Final Tax per s.169)", rs(wr.finalRec154a) + "  [WHT: " + rs(wr.finalWHT) + "]");
     if (wr.finalRec156 > 0)
       ftRows += row("AnnexC-156",  "Prize / Lottery Winnings u/s 156 (20% WHT = Final Tax)", rs(wr.finalRec156));
     if (wr.finalRec156a > 0)
@@ -5317,7 +5325,8 @@ function calcFinalTax() {
     { head:"Property Sale Gain",    sec:"236C/37", rate:"3%",      wht: Number(D.taxDeductedCapitalGains||0),                regime:"final"  },
     { head:"Securities Gain <1yr",  sec:"37A",     rate:"15%",     wht: Number(D.securitiesGainLessThan1Yr||0) * 0.15,      regime:"final"  },
     { head:"Securities Gain 1–2yr", sec:"37A",     rate:"12.5%",   wht: Number(D.securitiesGain1To2Yr||0) * 0.125,          regime:"final"  },
-    { head:"Business WHT (s.153)",   sec:"153",     rate:"4.5–15%", wht: Number(D.taxDeductedBusiness||0),                   regime:"mintax" },
+    { head:"IT/SW Exports (s.154A)",  sec:"154A",    rate:"0.25%/1%",wht: Number(n("wht_154a_wht")||D.misFinalWHT||0),       regime:"final"  },
+    { head:"Business WHT (s.153)",   sec:"153",     rate:"4–15%",   wht: Number(D.taxDeductedBusiness||0),                   regime:"mintax" },
     { head:"Rental Income WHT",     sec:"155",     rate:"15%",     wht: Number(D.taxDeductedRent||0),                        regime:"adj"    },
     { head:"Salary Tax",            sec:"149",     rate:"Slab",    wht: Number(D.taxDeductedSalary||0),                     regime:"adj"    },
   ];
@@ -6061,10 +6070,10 @@ const MIS_CODE_MAP = {
   "64060275":{"s":"153","n":"final","d":"Contracts u/s 153(1)(c) @12.5% Final"},
   "64060278":{"s":"153","n":"final","d":"Contracts u/s 153(1)(c) @14% Final"},
   "64060280":{"s":"153","n":"final","d":"Contracts u/s 153(1)(c) @15% Final"},
-  "64060286":{"s":"154A","n":"final","d":"IT/SW Exports PSEB registered u/s 154A Final"},
-  "64060287":{"s":"154A","n":"adjustable","d":"IT/SW Exports PSEB registered u/s 154A Adj"},
-  "64060288":{"s":"154A","n":"final","d":"IT/SW Exports not PSEB registered u/s 154A Final"},
-  "64060289":{"s":"154A","n":"adjustable","d":"IT/SW Exports not registered u/s 154A Adj"},
+  "64060286":{"s":"154A","n":"final","d":"IT/SW Exports PSEB registered u/s 154A @0.25% Final Tax"},
+  "64060287":{"s":"154A","n":"final","d":"IT/SW Exports PSEB registered u/s 154A @0.25% Final Tax (opt-out)"},
+  "64060288":{"s":"154A","n":"final","d":"IT/SW Exports Non-PSEB u/s 154A @1% Final Tax"},
+  "64060289":{"s":"154A","n":"final","d":"IT/SW Exports Non-PSEB u/s 154A @1% Final Tax (opt-out)"},
   "64060352":{"s":"153","n":"final","d":"Export-related services u/s 153(2) Final"},
   "64060556":{"s":"153","n":"final","d":"Specified Services u/s 153(1)(b) @3% Final"},
   "64060557":{"s":"153","n":"final","d":"Goods via Digital means u/s 153(2A) @1%"},
@@ -6308,14 +6317,35 @@ function _misNatureBadge(n){
 }
 function misApplyToReturn(){
   var entries=misGetFiltered();
+  // ── Adjustable / Advance WHT → Deductions fields ──
   var phone=0,elec=0,vehicle=0,propBuy=0,propSell=0,salary=0,rent=0,profit=0,dividend=0,other=0;
+  // ── Final Tax → WHT Register (154A, 156, 156A) ──
+  var ftr154aRec=0,ftr154aWht=0,ftr156Rec=0,ftr156Wht=0,ftr156aRec=0,ftr156aWht=0;
+  // ── Minimum Tax regime (153/154) → WHT Register ──
+  var min153aRec=0,min153aWht=0,min153bRec=0,min153bWht=0,min153cRec=0,min153cWht=0,min154Rec=0,min154Wht=0;
+
   entries.forEach(function(r){
-    if(r.nature!=='adjustable'&&r.nature!=='advance')return;
     var s=r.section;
+    // Final Tax u/s 154A
+    if(s==='154A'){ftr154aRec+=r.taxableAmt;ftr154aWht+=r.paidAmt;return;}
+    // Final Tax u/s 156 (prizes/winnings)
+    if(s==='156'){ftr156Rec+=r.taxableAmt;ftr156Wht+=r.paidAmt;return;}
+    // Final Tax u/s 156A (petroleum)
+    if(s==='156A'){ftr156aRec+=r.taxableAmt;ftr156aWht+=r.paidAmt;return;}
+    // Minimum Tax u/s 153 goods
+    if(s==='153'&&r.desc&&r.desc.toLowerCase().indexOf('goods')>=0){min153aRec+=r.taxableAmt;min153aWht+=r.paidAmt;return;}
+    // Minimum Tax u/s 153 services
+    if(s==='153'&&r.desc&&(r.desc.toLowerCase().indexOf('service')>=0||r.desc.toLowerCase().indexOf('it ')>=0)){min153bRec+=r.taxableAmt;min153bWht+=r.paidAmt;return;}
+    // Minimum Tax u/s 153 contracts
+    if(s==='153'){min153cRec+=r.taxableAmt;min153cWht+=r.paidAmt;return;}
+    // Minimum Tax u/s 154 exports
+    if(s==='154'){min154Rec+=r.taxableAmt;min154Wht+=r.paidAmt;return;}
+    // Adjustable / Advance
+    if(r.nature!=='adjustable'&&r.nature!=='advance')return;
     if(s==='149')salary+=r.paidAmt;
     else if(s==='155')rent+=r.paidAmt;
     else if(s==='151'||s==='151A')profit+=r.paidAmt;
-    else if(s==='150'&&r.nature==='adjustable')dividend+=r.paidAmt;
+    else if(s==='150')dividend+=r.paidAmt;
     else if(s==='236')phone+=r.paidAmt;
     else if(s==='235'||s==='235A')elec+=r.paidAmt;
     else if(s==='231B'||s==='234')vehicle+=r.paidAmt;
@@ -6323,26 +6353,59 @@ function misApplyToReturn(){
     else if(s==='236C')propSell+=r.paidAmt;
     else other+=r.paidAmt;
   });
-  var setF=function(id,v){if(v>0){var el=document.getElementById(id);if(el){el.value=v;if(D.hasOwnProperty(id))D[id]=v;}}};
+
+  // Helper: set DOM field + D object
+  var setF=function(id,v){if(v>0){var el=document.getElementById(id);if(el){el.value=v;if(typeof D!=='undefined'&&D.hasOwnProperty(id))D[id]=v;}}};
+  var addF=function(id,v){if(v>0){var el=document.getElementById(id);if(el){var cur=parseFloat(el.value)||0;el.value=cur+v;if(typeof D!=='undefined'&&D.hasOwnProperty(id))D[id]=cur+v;}}};
+
+  // Push adjustable WHT to Deductions tab
   setF('taxDeductedSalary',salary);setF('taxDeductedRent',rent);setF('taxDeductedProfit',profit);
   setF('taxDeductedDividend',dividend);setF('taxPhone',phone);setF('taxElectricity',elec);
   setF('taxVehicle',vehicle);setF('taxPropertyPurchase',propBuy);setF('taxPropertySale',propSell);
-  if(other>0){var el=document.getElementById('taxOtherAdjustable');if(el){el.value=(parseFloat(el.value)||0)+other;D.taxOtherAdjustable=parseFloat(el.value);}}
-  D.misAdjustableWHT=entries.filter(function(r){return r.nature==='adjustable'||r.nature==='advance';}).reduce(function(s,r){return s+r.paidAmt;},0);
+  if(other>0){addF('taxOtherAdjustable',other);}
+
+  // Push FINAL TAX to WHT Register (Advisor Tools → Bank/WHT)
+  addF('wht_154a_rec',ftr154aRec); addF('wht_154a_wht',ftr154aWht);
+  addF('wht_156_rec',ftr156Rec);   addF('wht_156_wht',ftr156Wht);
+  addF('wht_156a_rec',ftr156aRec); addF('wht_156a_wht',ftr156aWht);
+
+  // Push MINIMUM TAX receipts to WHT Register
+  addF('wht_153a_rec',min153aRec); addF('wht_153a_wht',min153aWht);
+  addF('wht_153b_rec',min153bRec); addF('wht_153b_wht',min153bWht);
+  addF('wht_153b_it_rec',0);  // IT services subset
+  addF('wht_153c_rec',min153cRec); addF('wht_153c_wht',min153cWht);
+  addF('wht_154_rec',min154Rec);   addF('wht_154_wht',min154Wht);
+
+  // Recompute WHT Register + sync to Summary/IRIS 114
+  if(typeof calcWHTRegister==='function') calcWHTRegister();
+  if(typeof whtSyncToReturn==='function') whtSyncToReturn();
+
+  // Store totals
+  if(typeof D!=='undefined'){
+    D.misAdjustableWHT=entries.filter(function(r){return r.nature==='adjustable'||r.nature==='advance';}).reduce(function(acc,r){return acc+r.paidAmt;},0);
+    D.misFinalWHT=ftr154aWht+ftr156Wht+ftr156aWht;
+  }
+
   var lines=[];
-  if(salary)lines.push('Salary: Rs '+_fmt(salary));
-  if(rent)lines.push('Rent: Rs '+_fmt(rent));
-  if(profit)lines.push('Profit-on-Debt: Rs '+_fmt(profit));
+  if(salary)lines.push('Salary WHT: Rs '+_fmt(salary));
+  if(rent)lines.push('Rent WHT: Rs '+_fmt(rent));
+  if(profit)lines.push('Profit-on-Debt WHT: Rs '+_fmt(profit));
   if(phone)lines.push('Phone: Rs '+_fmt(phone));
   if(elec)lines.push('Electricity: Rs '+_fmt(elec));
   if(vehicle)lines.push('Vehicle: Rs '+_fmt(vehicle));
   if(propBuy)lines.push('Property Buy: Rs '+_fmt(propBuy));
   if(propSell)lines.push('Property Sell: Rs '+_fmt(propSell));
-  if(other)lines.push('Other: Rs '+_fmt(other));
+  if(ftr154aWht)lines.push('FTR 154A (IT exports): Rs '+_fmt(ftr154aWht)+' on Rs '+_fmt(ftr154aRec)+' receipts → WHT Register');
+  if(ftr156Wht)lines.push('FTR 156 (Prizes): Rs '+_fmt(ftr156Wht)+' → WHT Register');
+  if(min153aWht+min153bWht+min153cWht+min154Wht>0)lines.push('Min Tax 153/154: Rs '+_fmt(min153aWht+min153bWht+min153cWht+min154Wht)+' → WHT Register');
+  if(other)lines.push('Other adj: Rs '+_fmt(other));
+
   var st=document.getElementById('misApplyStatus');
   st.style.display='block';
-  st.textContent=lines.length?'Applied: '+lines.join(' | '):'No adjustable entries found.';
-  setTimeout(function(){st.style.display='none';},6000);
+  st.innerHTML=lines.length
+    ?'<strong>Applied to Deductions + WHT Register + IRIS 114:</strong><br>'+lines.join(' &nbsp;|&nbsp; ')
+    :'No mappable entries found in this tax year.';
+  setTimeout(function(){st.style.display='none';},10000);
 }
 function misShowError(msg){var el=document.getElementById('misError');el.textContent=msg;el.style.display='block';}
 function misReset(){
