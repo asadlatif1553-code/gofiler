@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 60" width="220" height="60">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f2a4a;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1a3f6f;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#06b6d4;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <!-- Background pill -->
+  <rect width="220" height="60" rx="10" ry="10" fill="url(#bgGrad)"/>
+  <!-- Accent bar -->
+  <rect x="0" y="50" width="220" height="4" rx="0" ry="0" fill="url(#accentGrad)" opacity="0.8"/>
+  <rect x="0" y="50" width="220" height="4" rx="2" ry="2" fill="url(#accentGrad)" opacity="0.8"/>
+  <!-- AFS monogram block -->
+  <rect x="10" y="8" width="44" height="44" rx="7" ry="7" fill="url(#accentGrad)"/>
+  <text x="32" y="38" font-family="Arial Black, Arial, sans-serif" font-size="22" font-weight="900" fill="white" text-anchor="middle" letter-spacing="-1">AFS</text>
+  <!-- Main title -->
+  <text x="64" y="28" font-family="Arial, sans-serif" font-size="17" font-weight="700" fill="white" letter-spacing="0.3">Tax Assistant</text>
+  <!-- Subtitle -->
+  <text x="64" y="44" font-family="Arial, sans-serif" font-size="10" font-weight="400" fill="#94a3b8" letter-spacing="0.5">AFS CONSULTANTS</text>
+</svg>

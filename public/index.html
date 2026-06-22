@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-<title>GoFiler — Tax Year 2026</title>
+<title>AFS Tax Assistant — Tax Year 2026</title>
 
 <!-- PWA Manifest -->
 <link rel="manifest" href="/manifest.json"/>
@@ -15,12 +15,12 @@
 <!-- iOS PWA -->
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<meta name="apple-mobile-web-app-title" content="GoFiler"/>
+<meta name="apple-mobile-web-app-title" content="AFS Tax Assistant"/>
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png"/>
 
 <!-- SEO / Share -->
 <meta name="description" content="Pakistan Income Tax Return, Tax Planner & FBR Filer Checker — Tax Year 2026. Works offline."/>
-<meta name="application-name" content="GoFiler"/>
+<meta name="application-name" content="AFS Tax Assistant"/>
 
 <!-- PDF Export (cached by SW after first load → works offline) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -36,12 +36,12 @@
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 <script>
 // ── SW Emergency Eviction (runs immediately, before anything else) ──
-// If the browser is running any GoFiler SW older than v21, nuke it instantly.
+// If the browser is running any AFS Tax Assistant SW older than v21, nuke it instantly.
 (async function() {
   if (!("serviceWorker" in navigator) || !("caches" in window)) return;
   try {
     const keys = await caches.keys();
-    const stale = keys.filter(k => { const m = k.match(/gofiler-v(\d+)/); return m && +m[1] < 21; });
+    const stale = keys.filter(k => { const m = k.match(/afs-v(\d+)/); return m && +m[1] < 21; });
     if (!stale.length) return;
     const regs = await navigator.serviceWorker.getRegistrations();
     await Promise.all([...stale.map(k => caches.delete(k)), ...regs.map(r => r.unregister())]);
@@ -692,13 +692,13 @@ input[type=range].ps::-moz-range-thumb{width:18px;height:18px;border-radius:50%;
 <body>
 
 <!-- Offline indicator -->
-<div id="offlineBar">📵 You are offline — GoFiler is running from cache</div>
+<div id="offlineBar">📵 You are offline — AFS Tax Assistant is running from cache</div>
 
 <!-- PWA Install Banner -->
 <div id="installBanner">
-  <img src="/icons/icon-192.png" alt="GoFiler"/>
+  <img src="/icons/icon-192.png" alt="AFS Tax Assistant"/>
   <div class="ib-text">
-    <div class="ib-title">Install GoFiler on your device</div>
+    <div class="ib-title">Install AFS Tax Assistant on your device</div>
     <div class="ib-sub">Works offline · No app store needed · Free</div>
   </div>
   <button class="ib-btn" id="installBtn">Install</button>
@@ -706,9 +706,23 @@ input[type=range].ps::-moz-range-thumb{width:18px;height:18px;border-radius:50%;
 </div>
 
 <header>
-  <span class="logo-mark">GF</span>
-  <h1>GoFiler</h1>
-  <span>Tax Year 2026</span>
+  <a href="#" onclick="return false;" style="display:flex;align-items:center;gap:10px;text-decoration:none">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 44" width="36" height="36" style="flex-shrink:0">
+      <defs>
+        <linearGradient id="hLg" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:#1d4ed8"/>
+          <stop offset="100%" style="stop-color:#0891b2"/>
+        </linearGradient>
+      </defs>
+      <rect width="44" height="44" rx="8" fill="url(#hLg)"/>
+      <text x="22" y="30" font-family="Arial Black,Arial,sans-serif" font-size="17" font-weight="900" fill="white" text-anchor="middle" letter-spacing="-0.5">AFS</text>
+    </svg>
+    <div style="line-height:1.2">
+      <div style="font-size:15px;font-weight:800;color:#1e40af;letter-spacing:-.2px">AFS Tax Assistant</div>
+      <div style="font-size:10px;color:#64748b;letter-spacing:.3px">AFS CONSULTANTS</div>
+    </div>
+  </a>
+  <span style="font-size:11px;background:#dbeafe;color:#1e40af;padding:3px 9px;border-radius:20px;font-weight:600">Tax Year 2026</span>
   <div class="spacer"></div>
   <button id="backClientsBtn" class="hidden" onclick="showAdvisorDashboard()" style="background:rgba(139,92,246,.2);color:#c4b5fd;border:1px solid rgba(139,92,246,.35);padding:7px 14px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600">◀ Clients</button>
   <button id="saveBtn">💾 Save Return</button>
@@ -731,6 +745,7 @@ input[type=range].ps::-moz-range-thumb{width:18px;height:18px;border-radius:50%;
     <div class="nav-item" data-tab="iris">             <span class="icon">📋</span><span>IRIS 114</span></div>
     <div class="nav-item" data-tab="bank">             <span class="icon">🏦</span><span>Bank Import</span></div>
     <div class="nav-item" data-tab="mis">              <span class="icon">&#x1F4C4;</span><span>MIS WHT</span></div>
+    <div class="nav-item" data-tab="services"><span class="icon">🏢</span><span>Services</span></div>
     <div style="flex:1"></div>
     <div class="nav-item" data-tab="saved">            <span class="icon">📁</span><span>Saved</span></div>
   </nav>
@@ -1325,7 +1340,7 @@ input[type=range].ps::-moz-range-thumb{width:18px;height:18px;border-radius:50%;
       <div class="card" style="flex:1;display:flex;flex-direction:column;min-height:0;padding:16px">
         <div class="chat-messages" id="chatMessages">
           <div class="chat-bubble bot">
-            👋 <strong>Assalam-o-Alaikum!</strong> I'm your GoFiler Tax Advisor, powered by a local AI model.<br/><br/>
+            👋 <strong>Assalam-o-Alaikum!</strong> I'm your AFS Tax Advisor, powered by a local AI model.<br/><br/>
             I have full knowledge of the <strong>Income Tax Ordinance 2001</strong>, Finance Act 2025, and Tax Year 2026 rules.<br/><br/>
             Ask me anything about income tax — slabs, deductions, filing deadlines, property gains, WHT rates, or how to save tax legally. 🇵🇰
           </div>
@@ -2000,7 +2015,83 @@ input[type=range].ps::-moz-range-thumb{width:18px;height:18px;border-radius:50%;
       <div id="iris-content" class="hidden"></div>
     </div>
 
-  </main>
+  
+<div id="tab-services" class="tab-panel hidden">
+  <div class="card" style="background:linear-gradient(135deg,#0f2a4a 0%,#1a3f6f 100%);color:#fff;border:none;margin-bottom:16px">
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:8px">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 44" width="44" height="44" style="flex-shrink:0">
+        <rect width="44" height="44" rx="8" fill="url(#hLg)"/>
+        <text x="22" y="30" font-family="Arial Black,Arial,sans-serif" font-size="17" font-weight="900" fill="white" text-anchor="middle">AFS</text>
+      </svg>
+      <div>
+        <div style="font-size:20px;font-weight:800;letter-spacing:-.3px">AFS Consultants</div>
+        <div style="font-size:12px;opacity:.7;margin-top:2px">Professional Tax & Business Advisory Services</div>
+      </div>
+    </div>
+    <p style="font-size:13px;opacity:.8;margin:0">Pakistan's trusted partner for corporate tax, accounting, and business registration. Contact us on WhatsApp for a free initial consultation.</p>
+  </div>
+
+  <div style="display:grid;gap:14px">
+
+    <div class="card" style="border-left:4px solid #3b82f6;padding:16px 18px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+        <div>
+          <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:4px">🧾 Corporate Tax Filing</div>
+          <div style="font-size:12px;color:var(--muted);line-height:1.5">Accurate, timely corporate income tax returns for companies of all sizes. Full ITO compliance.</div>
+        </div>
+        <a href="https://wa.me/923328558734?text=Hi%20AFS%20Consultants%2C%20I%27m%20interested%20in%20Corporate%20Tax%20Filing." target="_blank" style="flex-shrink:0;background:#25d366;color:#fff;border:none;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:5px;white-space:nowrap">💬 WhatsApp</a>
+      </div>
+    </div>
+
+    <div class="card" style="border-left:4px solid #8b5cf6;padding:16px 18px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+        <div>
+          <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:4px">🏢 Business Registration</div>
+          <div style="font-size:12px;color:var(--muted);line-height:1.5">Company incorporation, SECP filing, NTN registration, and STRN — end-to-end handled.</div>
+        </div>
+        <a href="https://wa.me/923328558734?text=Hi%20AFS%20Consultants%2C%20I%27m%20interested%20in%20Business%20Registration." target="_blank" style="flex-shrink:0;background:#25d366;color:#fff;border:none;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:5px;white-space:nowrap">💬 WhatsApp</a>
+      </div>
+    </div>
+
+    <div class="card" style="border-left:4px solid #f59e0b;padding:16px 18px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+        <div>
+          <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:4px">📊 VAT Advisory</div>
+          <div style="font-size:12px;color:var(--muted);line-height:1.5">Sales Tax / VAT registration, monthly returns, input tax claims, and FBR audit support.</div>
+        </div>
+        <a href="https://wa.me/923328558734?text=Hi%20AFS%20Consultants%2C%20I%27m%20interested%20in%20VAT%20Advisory." target="_blank" style="flex-shrink:0;background:#25d366;color:#fff;border:none;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:5px;white-space:nowrap">💬 WhatsApp</a>
+      </div>
+    </div>
+
+    <div class="card" style="border-left:4px solid #10b981;padding:16px 18px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+        <div>
+          <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:4px">📒 Accounting & Bookkeeping</div>
+          <div style="font-size:12px;color:var(--muted);line-height:1.5">Monthly accounts, payroll, financial statements, and management reporting for businesses.</div>
+        </div>
+        <a href="https://wa.me/923328558734?text=Hi%20AFS%20Consultants%2C%20I%27m%20interested%20in%20Accounting%20and%20Bookkeeping." target="_blank" style="flex-shrink:0;background:#25d366;color:#fff;border:none;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:5px;white-space:nowrap">💬 WhatsApp</a>
+      </div>
+    </div>
+
+    <div class="card" style="border-left:4px solid #ef4444;padding:16px 18px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+        <div>
+          <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:4px">💡 Tax Planning & Advisory</div>
+          <div style="font-size:12px;color:var(--muted);line-height:1.5">Strategic tax structuring, wealth planning, and proactive advice to minimise your tax liability.</div>
+        </div>
+        <a href="https://wa.me/923328558734?text=Hi%20AFS%20Consultants%2C%20I%27m%20interested%20in%20Tax%20Planning%20and%20Advisory." target="_blank" style="flex-shrink:0;background:#25d366;color:#fff;border:none;padding:8px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:5px;white-space:nowrap">💬 WhatsApp</a>
+      </div>
+    </div>
+
+  </div>
+
+  <div style="text-align:center;margin-top:20px;padding:18px;background:var(--card);border-radius:12px;border:1px dashed #3b82f6">
+    <div style="font-size:13px;color:var(--muted);margin-bottom:10px">📞 Reach us directly</div>
+    <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:12px">+92 332 855 8734</div>
+    <a href="https://wa.me/923328558734?text=Hi%20AFS%20Consultants%2C%20I%27d%20like%20a%20free%20consultation." target="_blank" style="display:inline-block;background:#25d366;color:#fff;padding:10px 24px;border-radius:10px;font-weight:700;text-decoration:none;font-size:13px">💬 Free Consultation on WhatsApp</a>
+  </div>
+</div>
+</main>
 </div>
 
 <div id="toast"></div>
@@ -2622,6 +2713,20 @@ function renderSummary(c) {
   </div>
 
   ${warnHtml}
+
+  <div style="background:linear-gradient(135deg,#064e3b,#065f46);border-radius:14px;padding:20px;margin-top:8px;border:1px solid rgba(16,185,129,.3)">
+    <div style="display:flex;align-items:flex-start;gap:12px">
+      <span style="font-size:28px;flex-shrink:0">💬</span>
+      <div style="flex:1">
+        <div style="font-size:15px;font-weight:800;color:#ecfdf5;margin-bottom:4px">Filing looks complex? Let AFS handle it for you.</div>
+        <div style="font-size:12px;color:#6ee7b7;margin-bottom:14px">Our experts file hundreds of returns every year — accurately, on time, and stress-free.</div>
+        <a href="https://wa.me/923328558734?text=Hi%20AFS%20Consultants%2C%20I%20need%20help%20filing%20my%20TY2026%20return%20(${encodeURIComponent(c.isSalariedCase?'Salaried':'Non-Salaried')}%20case).%20My%20estimated%20${encodeURIComponent(c.balance>=0?'tax payable':'refund')}%20is%20Rs%20${fmt(Math.abs(c.balance))}." target="_blank" style="display:inline-flex;align-items:center;gap:8px;background:#25d366;color:#fff;padding:11px 22px;border-radius:10px;font-weight:700;text-decoration:none;font-size:13px">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          Get Expert Help — WhatsApp Now
+        </a>
+      </div>
+    </div>
+  </div>
   `;
 }
 
@@ -2799,11 +2904,11 @@ if ("serviceWorker" in navigator) {
     // Self-healing: if stuck on a very old cache (pre-v21), clear everything and reload
     const cacheNames = await caches.keys();
     const oldCaches = cacheNames.filter(n => {
-      const m = n.match(/gofiler-v(\d+)/);
+      const m = n.match(/afs-v(\d+)/);
       return m && parseInt(m[1]) < 21;
     });
     if (oldCaches.length) {
-      console.log("GoFiler: old SW cache detected, clearing and reloading...");
+      console.log("AFS Tax Assistant: old SW cache detected, clearing and reloading...");
       await Promise.all([
         ...oldCaches.map(n => caches.delete(n)),
         ...(await navigator.serviceWorker.getRegistrations()).map(r => r.unregister())
@@ -2814,7 +2919,7 @@ if ("serviceWorker" in navigator) {
 
     navigator.serviceWorker.register("/sw.js")
       .then(reg => {
-        console.log("GoFiler SW registered:", reg.scope);
+        console.log("AFS Tax Assistant SW registered:", reg.scope);
         reg.update(); // Always check for a newer SW on load
         reg.addEventListener("updatefound", () => {
           const newSW = reg.installing;
@@ -2859,7 +2964,7 @@ document.getElementById("installBtn").addEventListener("click", async () => {
   deferredInstallPrompt.prompt();
   const { outcome } = await deferredInstallPrompt.userChoice;
   deferredInstallPrompt = null;
-  if (outcome === "accepted") toast("GoFiler installed! Find it on your home screen.");
+  if (outcome === "accepted") toast("AFS Tax Assistant installed! Find it on your home screen.");
 });
 
 document.getElementById("installClose").addEventListener("click", () => {
@@ -2869,7 +2974,7 @@ document.getElementById("installClose").addEventListener("click", () => {
 
 window.addEventListener("appinstalled", () => {
   document.getElementById("installBanner").style.display = "none";
-  toast("GoFiler installed successfully!");
+  toast("AFS Tax Assistant installed successfully!");
 });
 
 /* Handle deep-link shortcuts (?tab=filer etc.) */
@@ -3029,7 +3134,7 @@ function collectPlannerAsReturnData() {
    TAX ADVISOR CHATBOT — WebLLM (browser-side)
    ════════════════════════════════════════════ */
 
-const CHAT_SYSTEM_PROMPT = `You are GoFiler Tax Advisor, an expert on Pakistan income tax law for Tax Year 2026. Answer in clear simple language. Give amounts in Pakistani Rupees (Rs).
+const CHAT_SYSTEM_PROMPT = `You are AFS Tax Advisor, an expert on Pakistan income tax law for Tax Year 2026. Answer in clear simple language. Give amounts in Pakistani Rupees (Rs).
 
 TAX YEAR 2026 (1 Jul 2025–30 Jun 2026) — Finance Act 2025
 
@@ -3711,7 +3816,7 @@ function bankPushAdd() { bankPush(true); }
 
 /* ════════════════════════════════════════════
    IRIS 114 PRE-FILL
-   Maps GoFiler data to FBR Form 114 fields
+   Maps AFS Tax Assistant data to FBR Form 114 fields
    ════════════════════════════════════════════ */
 
 function generateIRIS() {
@@ -4052,10 +4157,10 @@ function generateIRIS() {
   expRows += row("7071",  "Educational",                                         rs(0));
   expRows += row("7073",  "Functions / Gatherings",                              rs(0));
   expRows += row("7088",  "Other Personal / Household Expenses",                 rs(0));
-  expRows += row("7089",  "Total Personal Expenses (GoFiler total entered)",     rs(D.personalExpenses), true);
+  expRows += row("7089",  "Total Personal Expenses (AFS total entered)",     rs(D.personalExpenses), true);
   expRows += `<div class="iris-row" style="grid-column:1/-1;background:rgba(59,130,246,.07);padding:8px 12px">
     <span></span><span style="font-size:11px;color:var(--muted);grid-column:1/-1">
-      ℹ GoFiler records the total personal expenses (Rs ${fmt(D.personalExpenses)}). In IRIS Annex-F,
+      ℹ AFS Tax Assistant records the total personal expenses (Rs ${fmt(D.personalExpenses)}). In IRIS Annex-F,
       break this down into the individual heads above. The total must match.
     </span>
   </div>`;
@@ -4165,9 +4270,9 @@ function _parseFiledReturn(text) {
   const t = text.replace(/\r/g, " ").replace(/\s+/g, " ");
 
   // Generic pattern: look for "Label ... Rs XX,XX,XXX" or "Label ... XX,XX,XXX"
-  // Also look for GoFiler-style PDF which uses labels followed by values
+  // Also look for AFS Tax Assistant PDF which uses labels followed by values
   const patterns = [
-    // GoFiler PDF format: known labels
+    // AFS Tax Assistant PDF format: known labels
     { key:"Gross Salary",               re:/Gross Salary[\s:]+Rs\s*([\d,]+)/i },
     { key:"Taxable Salary",             re:/Taxable Salary[\s:]+Rs\s*([\d,]+)/i },
     { key:"Business Income",            re:/Net Business[\s\w]*Rs\s*([\d,]+)/i },
@@ -4217,7 +4322,7 @@ function _applyComparisonColumn() {
     if (sec.querySelector(".iris-comp-hdr")) return; // already added
     const hdr = document.createElement("div");
     hdr.className = "iris-comp-hdr";
-    hdr.innerHTML = '<span style="flex:1">Field</span><span class="c-cur">GoFiler</span><span class="c-fil">Filed Return</span><span style="width:60px"></span>';
+    hdr.innerHTML = '<span style="flex:1">Field</span><span class="c-cur">AFS</span><span class="c-fil">Filed Return</span><span style="width:60px"></span>';
     sec.insertBefore(hdr, sec.querySelector(".iris-row") || null);
   });
 
@@ -4245,7 +4350,7 @@ function _applyComparisonColumn() {
       const match  = Math.abs(curNum - filed) <= Math.max(1, curNum * 0.01); // within 1%
       compEl.classList.add(match ? "match" : "diff");
       compEl.textContent = "Rs " + filed.toLocaleString("en-PK");
-      if (!match && filed > 0) compEl.title = `GoFiler: Rs ${curNum.toLocaleString("en-PK")} vs Filed: Rs ${filed.toLocaleString("en-PK")}`;
+      if (!match && filed > 0) compEl.title = `AFS: Rs ${curNum.toLocaleString("en-PK")} vs Filed: Rs ${filed.toLocaleString("en-PK")}`;
     }
     // Insert before the copy button
     const copyBtn = row.querySelector(".iris-copy-btn");
@@ -4309,7 +4414,7 @@ async function _shareWhatsApp() {
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px">
           <div style="background:rgba(255,255,255,.18);border-radius:8px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:#fff;flex-shrink:0">GF</div>
           <div>
-            <div style="color:#fff;font-size:17px;font-weight:800;letter-spacing:-.3px">GoFiler</div>
+            <div style="color:#fff;font-size:17px;font-weight:800;letter-spacing:-.3px">AFS Tax Assistant</div>
             <div style="color:rgba(255,255,255,.65);font-size:11px">Tax Year 2026 — Finance Act 2025</div>
           </div>
         </div>
@@ -4341,7 +4446,7 @@ async function _shareWhatsApp() {
       <!-- Footer -->
       <div style="background:#f8fafc;padding:10px 22px;border-top:1px solid #e2e8f0;
                   display:flex;justify-content:space-between;align-items:center">
-        <span style="font-size:10px;color:#94a3b8">Generated with GoFiler</span>
+        <span style="font-size:10px;color:#94a3b8">Generated with AFS Tax Assistant</span>
         <span style="font-size:10px;color:#94a3b8">${new Date().toLocaleDateString("en-PK",{day:"2-digit",month:"short",year:"numeric"})}</span>
       </div>
     `;
@@ -4366,7 +4471,7 @@ async function _shareWhatsApp() {
 
     // ── Build text summary for fallback / metadata ──
     const textSummary = [
-      `*GoFiler — Tax Summary TY2026*`,
+      `*AFS Tax Assistant — Tax Summary TY2026*`,
       `👤 ${name}${cnic && cnic !== "—" ? " · CNIC: " + cnic : ""}`,
       `📊 ${caseTag} Case`,
       ``,
@@ -4376,24 +4481,24 @@ async function _shareWhatsApp() {
       ``,
       `${isPayable ? "🔴" : isRefund ? "🟢" : "🔵"} *${balLabel}: ${balAmt}*`,
       ``,
-      `_Prepared with GoFiler_`,
+      `_Prepared with AFS Tax Assistant_`,
     ].join("\n");
 
     // ── Share: Web Share API (mobile) or wa.me (desktop) ──
     const blob = await new Promise(res => canvas.toBlob(res, "image/png"));
-    const file = new File([blob], `GoFiler-TY2026-${(D.cnic||"summary").replace(/\D/g,"")}.png`, { type: "image/png" });
+    const file = new File([blob], `AFS-TY2026-${(D.cnic||"summary").replace(/\D/g,"")}.png`, { type: "image/png" });
 
     // Check for file-capable Web Share API
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
       await navigator.share({
         files: [file],
-        title: "GoFiler — Tax Summary TY2026",
+        title: "AFS Tax Assistant — Tax Summary TY2026",
         text: textSummary,
       });
       toast("Shared successfully!");
     } else if (navigator.share) {
       // Share API exists but doesn't support files — share text only
-      await navigator.share({ title: "GoFiler — Tax Summary TY2026", text: textSummary });
+      await navigator.share({ title: "AFS Tax Assistant — Tax Summary TY2026", text: textSummary });
       toast("Shared as text!");
     } else {
       // Desktop fallback — open WhatsApp Web with pre-filled text
@@ -4402,7 +4507,7 @@ async function _shareWhatsApp() {
       // Also offer image download
       const a = document.createElement("a");
       a.href = canvas.toDataURL("image/png");
-      a.download = `GoFiler-TaxSummary-TY2026.png`;
+      a.download = `AFS-TaxSummary-TY2026.png`;
       a.click();
       toast("Opened WhatsApp & downloaded image!");
     }
@@ -5455,7 +5560,7 @@ async function leadSubmit() {
     action : _leadAction,          // 'pdf' | 'save' | 'share'
     uid    : sess?.uid || null,
     ts     : new Date().toISOString(),
-    source : "gofiler-ty2026"
+    source : "afs-ty2026"
   };
 
   // Save to Firestore leads/ collection (fire-and-forget)
@@ -5759,7 +5864,7 @@ function _generatePDF() {
   doc.setFontSize(16);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(...WHITE);
-  doc.text("GoFiler", ML + 17, 12);
+  doc.text("AFS Tax Assistant", ML + 17, 12);
   doc.setFontSize(8);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(148, 163, 184);
@@ -5915,10 +6020,14 @@ function _generatePDF() {
   doc.setFontSize(7.5);
   doc.setTextColor(...GREY_TEXT);
   doc.setFont("helvetica", "normal");
-  doc.text("AI-generated summary for reference only. Not a substitute for official FBR filing. Figures based on Finance Act 2025.", ML, PH - 8);
-  doc.text("GoFiler — gofiler.vercel.app", PW - MR, PH - 8, { align: "right" });
+  doc.text("AI-generated summary for reference only. Not a substitute for official FBR filing. Figures based on Finance Act 2025.", ML, PH - 9.5);
+  doc.text("AFS Consultants  |  Tax \u00B7 Corporate \u00B7 Advisory \u00B7 Accounting", ML, PH - 5.5);
+  doc.setFont("helvetica", "bold");
+  doc.text("AFS CONSULTANTS", PW - MR, PH - 9.5, { align: "right" });
+  doc.setFont("helvetica", "normal");
+  doc.text("+92 332 855 8734  |  wa.me/923328558734", PW - MR, PH - 5.5, { align: "right" });
 
-  doc.save("GoFiler_TaxReturn_" + (D.cnic || "TY2026") + ".pdf");
+  doc.save("AFS_TaxReturn_" + (D.cnic || "TY2026") + ".pdf");
 }
 
 /* ══ MIS WHT REPORT ══ */
@@ -6459,6 +6568,10 @@ function misReset(){
 </script>
 
 <div id="advisorDashboard" class="hidden">
+  <div style="background:linear-gradient(90deg,#1d4ed8,#7c3aed);padding:10px 18px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:space-between">
+    <div style="font-size:12px;font-weight:600;color:#fff">🎉 <strong>New Client Offer:</strong> 20% OFF first tax filing</div>
+    <a href="https://wa.me/923328558734?text=Hi%2C%20I%27d%20like%20to%20claim%20the%2020%25%20discount%20for%20new%20clients." target="_blank" style="background:#fff;color:#1d4ed8;padding:5px 12px;border-radius:6px;font-weight:700;font-size:11px;text-decoration:none">💬 Claim</a>
+  </div>
   <div class="adv-dash-header">
     <div class="adv-dash-logo">⚖️</div>
     <div>
@@ -6511,8 +6624,8 @@ function misReset(){
      ══════════════════════════════════════════ -->
 <div id="roleOverlay" class="hidden">
   <div class="role-logo">
-    <div class="role-logo-mark">GF</div>
-    <div><h2>GoFiler</h2><span>Pakistan Income Tax Return — Tax Year 2026</span></div>
+    <div class="role-logo-mark" style="font-family:Arial Black,Arial,sans-serif;letter-spacing:-.5px">AFS</div>
+    <div><h2>AFS Tax Assistant</h2><span>Pakistan Income Tax Return — Tax Year 2026</span></div>
   </div>
   <p class="role-tagline">Before we begin, tell us who you are so we can tailor the experience for you.</p>
   <div class="role-cards">
@@ -6537,7 +6650,7 @@ function misReset(){
     <div class="lm-header">
       <div class="lm-logo">
         <div class="lm-logo-mark">GF</div>
-        <span style="font-size:13px;font-weight:700;color:#fff;opacity:.9">GoFiler — Pakistan Tax Returns</span>
+        <span style="font-size:13px;font-weight:700;color:#fff;opacity:.9">AFS Tax Assistant</span>
       </div>
       <div class="lm-title" id="leadTitle">Almost there! 🎯</div>
       <div class="lm-sub">Save your progress &amp; get free tax tips for TY 2026 delivered to your inbox.</div>
@@ -6568,11 +6681,17 @@ function misReset(){
      LOGIN SCREEN
      ══════════════════════════════════════════ -->
 <div id="loginScreen" class="hidden">
+
+<!-- ── AFS Discount Banner ── -->
+<div id="afsDiscountBanner" style="background:linear-gradient(135deg,#1d4ed8,#7c3aed);color:#fff;padding:12px 18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:space-between">
+  <div style="font-size:13px;font-weight:600">🎉 <strong>New Client Offer:</strong> 20% OFF your first tax filing with AFS Consultants. Contact us today!</div>
+  <a href="https://wa.me/923328558734?text=Hi%2C%20I%27d%20like%20to%20claim%20the%2020%25%20discount%20for%20new%20clients." target="_blank" style="background:#fff;color:#1d4ed8;padding:7px 16px;border-radius:8px;font-weight:700;font-size:12px;text-decoration:none;white-space:nowrap;flex-shrink:0">💬 Claim Offer</a>
+</div>
   <div class="ls-box">
     <div class="ls-logo">
-      <div class="ls-logo-mark">GF</div>
+      <div class="ls-logo-mark" style="background:linear-gradient(135deg,#1d4ed8,#0891b2);border-radius:12px;width:52px;height:52px;display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;font-size:16px;font-family:Arial Black,Arial,sans-serif;letter-spacing:-.5px;box-shadow:0 4px 15px rgba(29,78,216,.4)">AFS</div>
     </div>
-    <div class="ls-title">GoFiler</div>
+    <div class="ls-title">AFS Tax Assistant</div>
     <div class="ls-sub">Pakistan Income Tax Return — Tax Year 2026</div>
 
     <div class="ls-tabs">
@@ -6590,7 +6709,7 @@ function misReset(){
     </div>
     <div id="lsErr" style="color:#f87171;font-size:12px;min-height:16px;margin-bottom:4px"></div>
     <button class="ls-btn" onclick="loginUser()">Sign In →</button>
-    <div class="ls-link">New to GoFiler? <a href="#" onclick="document.getElementById('createAccountModal').classList.remove('hidden');return false">Create Account</a></div>
+    <div class="ls-link">New to AFS? <a href="#" onclick="document.getElementById('createAccountModal').classList.remove('hidden');return false">Create Account</a></div>
   </div>
 </div>
 
@@ -6600,7 +6719,7 @@ function misReset(){
 <div id="createAccountModal" class="hidden" style="position:fixed;inset:0;background:rgba(2,8,24,.85);z-index:4000;display:flex;align-items:center;justify-content:center;padding:20px">
   <div class="ls-box" style="max-height:90vh;overflow-y:auto">
     <div class="ls-title" style="margin-bottom:4px">Create Account</div>
-    <div class="ls-sub" style="margin-bottom:16px">GoFiler — Tax Year 2026</div>
+    <div class="ls-sub" style="margin-bottom:16px">AFS Tax Assistant — Tax Year 2026</div>
     <div class="ca-role-toggle">
       <button class="ca-role-btn active" data-role="taxpayer" onclick="caSetRole('taxpayer')">👤 Taxpayer</button>
       <button class="ca-role-btn" data-role="advisor" onclick="caSetRole('advisor')">⚖️ Tax Advisor</button>
