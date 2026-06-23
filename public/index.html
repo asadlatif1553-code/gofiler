@@ -746,6 +746,10 @@ input[type=range].ps::-moz-range-thumb{width:18px;height:18px;border-radius:50%;
     <div class="nav-item" data-tab="bank">             <span class="icon">🏦</span><span>Bank Import</span></div>
     <div class="nav-item" data-tab="mis">              <span class="icon">&#x1F4C4;</span><span>MIS WHT</span></div>
     <div class="nav-item" data-tab="services"><span class="icon">🏢</span><span>Services</span></div>
+    <div class="nav-item" data-tab="consult"><span class="icon">📋</span><span>Consult</span></div>
+    <div class="nav-item" data-tab="ntn"><span class="icon">🪪</span><span>NTN Reg</span></div>
+    <div class="nav-item" data-tab="calendar"><span class="icon">📅</span><span>Calendar</span></div>
+    <div class="nav-item" data-tab="referral"><span class="icon">🎁</span><span>Referral</span></div>
     <div style="flex:1"></div>
     <div class="nav-item" data-tab="saved">            <span class="icon">📁</span><span>Saved</span></div>
   </nav>
@@ -1479,6 +1483,14 @@ input[type=range].ps::-moz-range-thumb{width:18px;height:18px;border-radius:50%;
       </div>
     </div>
 
+
+
+      <!-- P7: Business Income Estimator -->
+      <div class="card" id="tab-planner-biz" style="margin-top:0">
+        <div style="font-size:15px;font-weight:800;margin-bottom:4px">📊 Business Income Estimator</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Enter monthly revenue and expenses to estimate annual tax liability and quarterly advance tax.</div>
+        <div id="bizEstimator"></div>
+      </div>
     <!-- ═══════════════════════ SAVED ═══════════════════════ -->
     <div class="tab-panel" id="tab-saved">
       <div class="card">
@@ -2089,6 +2101,143 @@ input[type=range].ps::-moz-range-thumb{width:18px;height:18px;border-radius:50%;
     <div style="font-size:13px;color:var(--muted);margin-bottom:10px">📞 Reach us directly</div>
     <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:12px">+92 332 855 8734</div>
     <a href="https://wa.me/923328558734?text=Hi%20AFS%20Consultants%2C%20I%27d%20like%20a%20free%20consultation." target="_blank" style="display:inline-block;background:#25d366;color:#fff;padding:10px 24px;border-radius:10px;font-weight:700;text-decoration:none;font-size:13px">💬 Free Consultation on WhatsApp</a>
+  </div>
+</div>
+
+<!-- ══ CONSULT TAB ══ -->
+<div id="tab-consult" class="tab-panel">
+  <div class="card" style="max-width:580px;margin:0 auto">
+    <div style="font-size:18px;font-weight:800;margin-bottom:4px">📋 Request a Consultation</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:18px">Fill in your details — we'll open WhatsApp with everything pre-filled for AFS Consultants.</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+      <div><label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">Full Name *</label>
+        <input id="cns_name" type="text" placeholder="Your name" style="width:100%;padding:9px 11px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;box-sizing:border-box"></div>
+      <div><label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">Phone / WhatsApp *</label>
+        <input id="cns_phone" type="tel" placeholder="+923001234567" style="width:100%;padding:9px 11px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;box-sizing:border-box"></div>
+      <div><label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">Email</label>
+        <input id="cns_email" type="email" placeholder="you@example.com" style="width:100%;padding:9px 11px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;box-sizing:border-box"></div>
+      <div><label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">Service Needed *</label>
+        <select id="cns_service" style="width:100%;padding:9px 11px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px">
+          <option>Tax Filing</option><option>NTN Registration</option><option>VAT Advisory</option><option>Business Registration</option><option>Accounting & Bookkeeping</option><option>Tax Planning</option><option>Other</option>
+        </select></div>
+      <div><label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">Preferred Time</label>
+        <input id="cns_time" type="text" placeholder="e.g. Weekdays 10am-2pm" style="width:100%;padding:9px 11px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;box-sizing:border-box"></div>
+    </div>
+    <div style="margin-bottom:12px"><label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">Message / Details</label>
+      <textarea id="cns_msg" rows="3" placeholder="Describe your situation briefly..." style="width:100%;padding:9px 11px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;box-sizing:border-box;resize:vertical"></textarea></div>
+    <button onclick="submitConsultation()" style="background:#25d366;color:#fff;border:none;width:100%;padding:12px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer">💬 Send via WhatsApp to AFS Consultants</button>
+    <div id="cns_history" style="margin-top:20px"></div>
+  </div>
+</div>
+
+<!-- ══ NTN WIZARD TAB ══ -->
+<div id="tab-ntn" class="tab-panel">
+  <div class="card" style="max-width:560px;margin:0 auto">
+    <div style="font-size:18px;font-weight:800;margin-bottom:2px">🪪 NTN Registration</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:16px">AFS Consultants will register your NTN within 24 hours of submission.</div>
+    <!-- Step indicator -->
+    <div style="display:flex;gap:8px;margin-bottom:20px" id="ntnStepBar">
+      <div class="ntn-step active" data-step="1" style="flex:1;padding:8px;text-align:center;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;background:#1d4ed8;color:#fff">1 · Personal</div>
+      <div class="ntn-step" data-step="2" style="flex:1;padding:8px;text-align:center;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;background:var(--bg);color:var(--muted);border:1px solid var(--border)">2 · Contact</div>
+      <div class="ntn-step" data-step="3" style="flex:1;padding:8px;text-align:center;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;background:var(--bg);color:var(--muted);border:1px solid var(--border)">3 · Income</div>
+      <div class="ntn-step" data-step="4" style="flex:1;padding:8px;text-align:center;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;background:var(--bg);color:var(--muted);border:1px solid var(--border)">4 · Submit</div>
+    </div>
+    <!-- Step 1 -->
+    <div id="ntnPanel1" style="display:block">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div><label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">Full Name *</label><input id="ntn_name" type="text" placeholder="As per CNIC" style="width:100%;padding:9px 11px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;box-sizing:border-box"></div>
+        <div><label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">Father's Name *</label><input id="ntn_father" type="text" placeholder="Father's name" style="width:100%;padding:9px 11px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;box-sizing:border-box"></div>
+        <div><label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">CNIC *</label><input id="ntn_cnic" type="text" placeholder="3520212345678" maxlength="13" inputmode="numeric" style="width:100%;padding:9px 11px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;box-sizing:border-box"></div>
+        <div><label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">Date of Birth *</label><input id="ntn_dob" type="date" style="width:100%;padding:9px 11px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;box-sizing:border-box"></div>
+        <div><label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">Gender</label><select id="ntn_gender" style="width:100%;padding:9px 11px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px"><option>Male</option><option>Female</option></select></div>
+      </div>
+      <button onclick="ntnNext(1)" style="margin-top:14px;background:linear-gradient(135deg,#1d4ed8,#7c3aed);color:#fff;border:none;width:100%;padding:11px;border-radius:9px;font-weight:700;font-size:13px;cursor:pointer">Next → Contact Info</button>
+    </div>
+    <!-- Step 2 -->
+    <div id="ntnPanel2" style="display:none">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div><label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">Phone *</label><input id="ntn_phone" type="tel" placeholder="+923001234567" style="width:100%;padding:9px 11px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;box-sizing:border-box"></div>
+        <div><label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">Email</label><input id="ntn_email" type="email" placeholder="you@example.com" style="width:100%;padding:9px 11px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;box-sizing:border-box"></div>
+        <div><label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">City *</label><input id="ntn_city" type="text" placeholder="Lahore" style="width:100%;padding:9px 11px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;box-sizing:border-box"></div>
+      </div>
+      <div style="margin-top:12px"><label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">Full Address *</label><textarea id="ntn_addr" rows="2" placeholder="House No., Street, Area, City" style="width:100%;padding:9px 11px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;box-sizing:border-box;resize:vertical"></textarea></div>
+      <div style="display:flex;gap:10px;margin-top:14px">
+        <button onclick="ntnGo(1)" style="background:var(--bg);color:var(--text);border:1px solid var(--border);flex:1;padding:10px;border-radius:9px;font-weight:600;font-size:13px;cursor:pointer">← Back</button>
+        <button onclick="ntnNext(2)" style="background:linear-gradient(135deg,#1d4ed8,#7c3aed);color:#fff;border:none;flex:2;padding:10px;border-radius:9px;font-weight:700;font-size:13px;cursor:pointer">Next → Income Type</button>
+      </div>
+    </div>
+    <!-- Step 3 -->
+    <div id="ntnPanel3" style="display:none">
+      <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:12px">What type of income do you have?</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <label style="display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--border);border-radius:10px;cursor:pointer"><input type="radio" name="ntn_income" value="Salaried" checked> <span style="font-size:13px;font-weight:600">💼 Salaried</span> <span style="font-size:11px;color:var(--muted);margin-left:4px">— Income from employment only</span></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--border);border-radius:10px;cursor:pointer"><input type="radio" name="ntn_income" value="Business"> <span style="font-size:13px;font-weight:600">🏢 Business</span> <span style="font-size:11px;color:var(--muted);margin-left:4px">— Self-employed or own business</span></label>
+        <label style="display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--border);border-radius:10px;cursor:pointer"><input type="radio" name="ntn_income" value="Both (Salaried + Business)"> <span style="font-size:13px;font-weight:600">📊 Both</span> <span style="font-size:11px;color:var(--muted);margin-left:4px">— Salary + business/freelance</span></label>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:14px">
+        <button onclick="ntnGo(2)" style="background:var(--bg);color:var(--text);border:1px solid var(--border);flex:1;padding:10px;border-radius:9px;font-weight:600;font-size:13px;cursor:pointer">← Back</button>
+        <button onclick="ntnNext(3)" style="background:linear-gradient(135deg,#1d4ed8,#7c3aed);color:#fff;border:none;flex:2;padding:10px;border-radius:9px;font-weight:700;font-size:13px;cursor:pointer">Next → Review</button>
+      </div>
+    </div>
+    <!-- Step 4: Review -->
+    <div id="ntnPanel4" style="display:none">
+      <div id="ntnReview" style="background:var(--bg);border-radius:10px;padding:14px;margin-bottom:14px;font-size:13px;line-height:2"></div>
+      <div style="background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:10px;padding:12px;font-size:12px;color:#10b981;margin-bottom:14px">✅ AFS Consultants will register your NTN within 24 hours of submission.</div>
+      <div style="display:flex;gap:10px">
+        <button onclick="ntnGo(3)" style="background:var(--bg);color:var(--text);border:1px solid var(--border);flex:1;padding:10px;border-radius:9px;font-weight:600;font-size:13px;cursor:pointer">← Edit</button>
+        <a id="ntnWABtn" href="#" target="_blank" style="background:#25d366;color:#fff;border:none;flex:2;padding:10px;border-radius:9px;font-weight:700;font-size:13px;cursor:pointer;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:6px">💬 Submit via WhatsApp</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ CALENDAR TAB ══ -->
+<div id="tab-calendar" class="tab-panel">
+  <div class="card" style="margin-bottom:14px">
+    <div style="font-size:17px;font-weight:800;margin-bottom:4px">📅 FBR Tax Calendar — TY2026</div>
+    <div style="font-size:12px;color:var(--muted)">All key FBR deadlines with countdown. Click "Remind Me" to get browser notifications.</div>
+  </div>
+  <div id="calDeadlines" style="display:grid;gap:12px"></div>
+
+  <!-- FBR Notice Tracker -->
+  <div class="card" style="margin-top:20px">
+    <div style="font-size:16px;font-weight:800;margin-bottom:4px">⚠️ FBR Notice Tracker</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Received a notice from FBR? Log it here and get expert help from AFS Consultants.</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+      <div><label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">Notice Number</label><input id="ntc_num" type="text" placeholder="e.g. IR(IT-1)/2025/123" style="width:100%;padding:9px 11px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:12px;box-sizing:border-box"></div>
+      <div><label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">Notice Type</label><select id="ntc_type" style="width:100%;padding:9px 11px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:12px"><option>Audit Notice</option><option>Non-Filer Notice</option><option>Recovery Notice</option><option>Penalty Notice</option><option>Other</option></select></div>
+    </div>
+    <div style="margin-bottom:10px"><label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">Description / Details</label><textarea id="ntc_desc" rows="2" placeholder="Paste or describe the notice..." style="width:100%;padding:9px 11px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:12px;box-sizing:border-box;resize:vertical"></textarea></div>
+    <button onclick="submitNotice()" style="background:#f59e0b;color:#fff;border:none;width:100%;padding:11px;border-radius:9px;font-weight:700;font-size:13px;cursor:pointer">⚠️ Get Help via WhatsApp</button>
+    <div id="noticeHistory" style="margin-top:16px"></div>
+  </div>
+</div>
+
+<!-- ══ REFERRAL TAB ══ -->
+<div id="tab-referral" class="tab-panel">
+  <div class="card" style="max-width:520px;margin:0 auto;text-align:center">
+    <div style="font-size:40px;margin-bottom:8px">🎁</div>
+    <div style="font-size:18px;font-weight:800;margin-bottom:4px">Refer & Save</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:20px">Share your referral code — your friend gets <strong>15% off</strong> their first filing, and you get <strong>10% off</strong> yours.</div>
+    <div style="background:var(--bg);border:2px dashed #3b82f6;border-radius:12px;padding:20px;margin-bottom:16px">
+      <div style="font-size:11px;font-weight:600;color:var(--muted);margin-bottom:6px">YOUR REFERRAL CODE</div>
+      <div id="refCode" style="font-size:28px;font-weight:900;color:#3b82f6;letter-spacing:3px;font-family:monospace">—</div>
+      <button onclick="copyRefCode()" style="margin-top:10px;background:rgba(59,130,246,.15);color:#3b82f6;border:1px solid rgba(59,130,246,.3);padding:7px 20px;border-radius:8px;cursor:pointer;font-weight:600;font-size:12px">📋 Copy Code</button>
+    </div>
+    <div id="refStats" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+      <div style="background:var(--bg);border-radius:10px;padding:12px;border:1px solid var(--border)"><div style="font-size:10px;color:var(--muted)">Referrals Made</div><div id="refCount" style="font-size:20px;font-weight:800;color:var(--text)">0</div></div>
+      <div style="background:var(--bg);border-radius:10px;padding:12px;border:1px solid var(--border)"><div style="font-size:10px;color:var(--muted)">Your Savings</div><div id="refSavings" style="font-size:18px;font-weight:800;color:#10b981">Rs 0</div></div>
+    </div>
+    <a id="refWABtn" href="#" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:8px;background:#25d366;color:#fff;padding:12px;border-radius:10px;font-weight:700;font-size:14px;text-decoration:none;margin-bottom:12px">💬 Share via WhatsApp</a>
+    <div style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);border-radius:10px;padding:12px;margin-bottom:12px">
+      <div style="font-size:12px;font-weight:700;color:#f59e0b;margin-bottom:6px">Have a referral code?</div>
+      <div style="display:flex;gap:8px">
+        <input id="refInput" type="text" placeholder="Enter code" style="flex:1;padding:9px 11px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;text-transform:uppercase;letter-spacing:2px">
+        <button onclick="applyRefCode()" style="background:#f59e0b;color:#fff;border:none;padding:9px 16px;border-radius:8px;font-weight:700;cursor:pointer;font-size:12px">Apply</button>
+      </div>
+      <div id="refApplyMsg" style="font-size:11px;margin-top:6px;min-height:14px"></div>
+    </div>
+    <div id="refCodeList" style="text-align:left"></div>
   </div>
 </div>
 </main>
@@ -6584,7 +6733,8 @@ function misReset(){
   <div class="adv-dash-body">
     <div class="adv-dash-toolbar">
       <input class="adv-search" id="advSearch" type="text" placeholder="🔍 Search by name, CNIC..." oninput="renderClientList(this.value)">
-      <button class="adv-add-btn" onclick="showAddClientModal()">+ Add New Client</button>
+      <button class="adv-add-btn" onclick="showAddClientModal()">+ Add Individual Client</button>
+      <button onclick="showCorporateModal()" style="background:linear-gradient(135deg,#0f766e,#0891b2);color:#fff;border:none;padding:10px 16px;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px">🏢 Corporate Bulk Filing</button>
     </div>
     <div class="adv-clients-grid" id="advClientList">
       <div class="adv-empty"><div class="adv-empty-icon">👥</div>Loading clients…</div>
@@ -6751,3 +6901,796 @@ function misReset(){
 </div>
 
 <!-- ════════════════════════════════════════�
+
+<!-- ══════════════════════════════════════════
+     CORPORATE CLIENT PORTAL MODAL
+     ══════════════════════════════════════════ -->
+<div id="corporateModal" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:9000;display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;padding:20px">
+  <div style="background:var(--surface);border-radius:16px;width:100%;max-width:860px;padding:24px;margin:auto">
+
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <div>
+        <div style="font-size:18px;font-weight:800;color:var(--text)">🏢 Corporate Bulk Filing</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px">Upload employee CSV → auto-generate tax summaries → download PDFs</div>
+      </div>
+      <button onclick="closeCorporateModal()" style="background:rgba(239,68,68,.15);color:#f87171;border:1px solid rgba(239,68,68,.25);padding:6px 14px;border-radius:8px;cursor:pointer;font-weight:600;font-size:12px">✕ Close</button>
+    </div>
+
+    <div id="corpStep1">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px">
+        <div>
+          <label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px">Company Name *</label>
+          <input id="corpCompanyName" type="text" placeholder="e.g. XYZ Technologies Ltd." style="width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;box-sizing:border-box">
+        </div>
+        <div>
+          <label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px">Tax Year</label>
+          <select id="corpTaxYear" style="width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px">
+            <option value="2026">2026</option><option value="2025">2025</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);border-radius:10px;padding:14px;margin-bottom:16px">
+        <div style="font-size:12px;font-weight:700;color:#3b82f6;margin-bottom:8px">📋 Required CSV columns:</div>
+        <code style="font-size:11px;color:var(--text);background:var(--bg);padding:8px 12px;border-radius:6px;display:block;line-height:1.9">
+          Name, CNIC, GrossSalary, WHT_Deducted, Phone (optional)<br>
+          Ahmed Ali, 3520212345678, 1800000, 32000, +923001234567<br>
+          Sara Khan, 4220112345679, 2400000, 78000,
+        </code>
+        <a href="#" onclick="corpDownloadTemplate();return false;" style="font-size:11px;color:#3b82f6;text-decoration:none;margin-top:8px;display:inline-block">⬇ Download template CSV</a>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px">
+        <div>
+          <label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px">Upload CSV / Excel</label>
+          <input type="file" id="corpCsvFile" accept=".csv,.xlsx,.xls" onchange="corpHandleFile(this)" style="width:100%;padding:8px;border-radius:8px;border:1px dashed var(--border);background:var(--bg);color:var(--text);font-size:12px;box-sizing:border-box">
+        </div>
+        <div>
+          <label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px">Or Paste CSV Data</label>
+          <textarea id="corpCsvPaste" placeholder="Name,CNIC,GrossSalary,WHT_Deducted&#10;Ahmed Ali,3520212345678,1800000,32000" rows="4" style="width:100%;padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:11px;box-sizing:border-box;resize:vertical"></textarea>
+        </div>
+      </div>
+
+      <div id="corpUploadErr" style="color:#f87171;font-size:12px;margin-bottom:10px;min-height:16px"></div>
+      <button onclick="corpProcessCSV()" style="background:linear-gradient(135deg,#1d4ed8,#7c3aed);color:#fff;border:none;padding:11px 28px;border-radius:10px;font-weight:700;font-size:14px;cursor:pointer;width:100%">⚡ Generate Tax Summaries</button>
+    </div>
+
+    <div id="corpResults" style="display:none;margin-top:20px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
+        <div>
+          <span id="corpResultTitle" style="font-size:15px;font-weight:700;color:var(--text)"></span>
+          <span id="corpResultCount" style="font-size:12px;color:var(--muted);margin-left:8px"></span>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button onclick="corpDownloadCombinedPDF()" style="background:linear-gradient(135deg,#dc2626,#ea580c);color:#fff;border:none;padding:9px 16px;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer">📄 Combined PDF</button>
+          <button onclick="corpDownloadAllPDFs()" style="background:linear-gradient(135deg,#0f766e,#0891b2);color:#fff;border:none;padding:9px 16px;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer">📦 All Individual PDFs</button>
+          <button onclick="document.getElementById('corpStep1').style.display='block';document.getElementById('corpResults').style.display='none';" style="background:rgba(100,116,139,.15);color:var(--text);border:1px solid var(--border);padding:9px 16px;border-radius:8px;font-weight:600;font-size:12px;cursor:pointer">↩ New Upload</button>
+        </div>
+      </div>
+      <div id="corpStats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:10px;margin-bottom:16px"></div>
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:12px">
+          <thead>
+            <tr style="background:var(--bg)">
+              <th style="padding:10px 12px;text-align:left;border-bottom:1px solid var(--border);color:var(--muted);font-weight:600">#</th>
+              <th style="padding:10px 12px;text-align:left;border-bottom:1px solid var(--border);color:var(--muted);font-weight:600">Employee</th>
+              <th style="padding:10px 12px;text-align:left;border-bottom:1px solid var(--border);color:var(--muted);font-weight:600">CNIC</th>
+              <th style="padding:10px 12px;text-align:right;border-bottom:1px solid var(--border);color:var(--muted);font-weight:600">Gross Salary</th>
+              <th style="padding:10px 12px;text-align:right;border-bottom:1px solid var(--border);color:var(--muted);font-weight:600">WHT Deducted</th>
+              <th style="padding:10px 12px;text-align:right;border-bottom:1px solid var(--border);color:var(--muted);font-weight:600">Tax Liability</th>
+              <th style="padding:10px 12px;text-align:right;border-bottom:1px solid var(--border);color:var(--muted);font-weight:600">Balance</th>
+              <th style="padding:10px 12px;text-align:center;border-bottom:1px solid var(--border);color:var(--muted);font-weight:600">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="corpTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════
+   CORPORATE CLIENT PORTAL
+   ══════════════════════════════════════════════════════ */
+
+let _corpEmployees = [];  // processed employee data
+
+function showCorporateModal() {
+  document.getElementById('corporateModal').classList.remove('hidden');
+  document.getElementById('corpStep1').style.display = 'block';
+  document.getElementById('corpResults').style.display = 'none';
+  document.getElementById('corpUploadErr').textContent = '';
+}
+function closeCorporateModal() {
+  document.getElementById('corporateModal').classList.add('hidden');
+}
+
+/* ── Download blank template ── */
+function corpDownloadTemplate() {
+  const csv = 'Name,CNIC,GrossSalary,WHT_Deducted,Phone\nAhmed Ali,3520212345678,1800000,32000,+923001234567\nSara Khan,4220112345679,2400000,78000,\n';
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = 'AFS_Corporate_Employee_Template.csv';
+  a.click();
+}
+
+/* ── Parse CSV text → array of {name,cnic,salary,wht,phone} ── */
+function _corpParseCSV(text) {
+  const lines = text.trim().split('\n').map(l => l.trim()).filter(l => l);
+  if (lines.length < 2) throw new Error('CSV must have a header row and at least one employee.');
+  const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+  const nameIdx   = headers.findIndex(h => h.includes('name'));
+  const cnicIdx   = headers.findIndex(h => h.includes('cnic'));
+  const salaryIdx = headers.findIndex(h => h.includes('salary') || h.includes('gross'));
+  const whtIdx    = headers.findIndex(h => h.includes('wht') || h.includes('deduct') || h.includes('tax'));
+  const phoneIdx  = headers.findIndex(h => h.includes('phone') || h.includes('mobile'));
+  if (nameIdx < 0 || cnicIdx < 0 || salaryIdx < 0 || whtIdx < 0)
+    throw new Error('Missing required columns: Name, CNIC, GrossSalary, WHT_Deducted');
+
+  return lines.slice(1).map((line, i) => {
+    const cols = line.split(',').map(c => c.trim());
+    const salary = Number((cols[salaryIdx]||'0').replace(/[^0-9.]/g,''));
+    const wht    = Number((cols[whtIdx]   ||'0').replace(/[^0-9.]/g,''));
+    return {
+      name:   cols[nameIdx]  || ('Employee ' + (i+1)),
+      cnic:   (cols[cnicIdx] || '').replace(/[^0-9]/g,''),
+      salary, wht,
+      phone:  phoneIdx >= 0 ? (cols[phoneIdx]||'') : ''
+    };
+  }).filter(e => e.salary > 0 || e.cnic);
+}
+
+/* ── Handle file upload (CSV or Excel) ── */
+function corpHandleFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (file.name.match(/\.xlsx?$/i) && window.XLSX) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      try {
+        const wb = XLSX.read(e.target.result, { type: 'array' });
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const csv = XLSX.utils.sheet_to_csv(ws);
+        document.getElementById('corpCsvPaste').value = csv;
+      } catch(err) { document.getElementById('corpUploadErr').textContent = 'Error reading Excel: ' + err.message; }
+    };
+    reader.readAsArrayBuffer(file);
+  } else {
+    const reader = new FileReader();
+    reader.onload = e => { document.getElementById('corpCsvPaste').value = e.target.result; };
+    reader.readAsText(file);
+  }
+}
+
+/* ── Compute salaried tax for one employee ── */
+function _corpComputeTax(salary, whtDeducted) {
+  const taxableSalary = Math.max(0, salary);
+  const isSalaried = true;
+  let taxGross = 0;
+  const t = taxableSalary;
+  if (t <= 600000)    taxGross = 0;
+  else if (t <= 1200000)  taxGross = Math.round(0.01*(t-600000));
+  else if (t <= 2200000)  taxGross = Math.round(6000+0.11*(t-1200000));
+  else if (t <= 3200000)  taxGross = Math.round(116000+0.23*(t-2200000));
+  else if (t <= 4100000)  taxGross = Math.round(346000+0.30*(t-3200000));
+  else if (t <= 6000000)  taxGross = Math.round(616000+0.35*(t-4100000));
+  else                    taxGross = Math.round(1281000+0.45*(t-6000000));
+  const surcharge = t > 10000000 ? Math.round(0.09*taxGross) : 0;
+  const totalTax = taxGross + surcharge;
+  const balance  = totalTax - whtDeducted;
+  return { taxGross, surcharge, totalTax, balance };
+}
+
+/* ── Main: process CSV and render results ── */
+function corpProcessCSV() {
+  const errEl = document.getElementById('corpUploadErr');
+  errEl.textContent = '';
+  const company = (document.getElementById('corpCompanyName').value||'').trim();
+  if (!company) { errEl.textContent = 'Please enter a company name.'; return; }
+
+  const csvText = document.getElementById('corpCsvPaste').value.trim();
+  if (!csvText) { errEl.textContent = 'Please upload a CSV file or paste CSV data.'; return; }
+
+  let employees;
+  try { employees = _corpParseCSV(csvText); }
+  catch(e) { errEl.textContent = e.message; return; }
+  if (!employees.length) { errEl.textContent = 'No valid employee rows found.'; return; }
+
+  // Compute tax for each
+  _corpEmployees = employees.map((e, i) => ({
+    ...e,
+    ...(_corpComputeTax(e.salary, e.wht)),
+    idx: i + 1,
+    company
+  }));
+
+  // Render stats
+  const totalSalary  = _corpEmployees.reduce((s,e)=>s+e.salary,0);
+  const totalWHT     = _corpEmployees.reduce((s,e)=>s+e.wht,0);
+  const totalTax     = _corpEmployees.reduce((s,e)=>s+e.totalTax,0);
+  const totalBal     = _corpEmployees.reduce((s,e)=>s+e.balance,0);
+  const payable      = _corpEmployees.filter(e=>e.balance>0).length;
+  const refundable   = _corpEmployees.filter(e=>e.balance<0).length;
+
+  const statCard = (label, value, color) =>
+    `<div style="background:var(--bg);border-radius:10px;padding:14px;text-align:center;border:1px solid var(--border)">
+       <div style="font-size:11px;color:var(--muted);margin-bottom:4px">${label}</div>
+       <div style="font-size:15px;font-weight:800;color:${color||'var(--text)'}">Rs ${fmt(value)}</div>
+     </div>`;
+
+  document.getElementById('corpStats').innerHTML =
+    statCard('Total Gross Salary', totalSalary, '#3b82f6') +
+    statCard('Total WHT Deducted', totalWHT, '#f59e0b') +
+    statCard('Total Tax Liability', totalTax, '#8b5cf6') +
+    `<div style="background:var(--bg);border-radius:10px;padding:14px;text-align:center;border:1px solid var(--border)">
+       <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Net Balance</div>
+       <div style="font-size:15px;font-weight:800;color:${totalBal>=0?'#ef4444':'#10b981'}">Rs ${fmt(Math.abs(totalBal))} ${totalBal>=0?'Payable':'Refundable'}</div>
+     </div>` +
+    `<div style="background:var(--bg);border-radius:10px;padding:14px;text-align:center;border:1px solid var(--border)">
+       <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Employees</div>
+       <div style="font-size:13px;font-weight:800;color:var(--text)">${_corpEmployees.length} total</div>
+       <div style="font-size:10px;color:#ef4444">${payable} payable · <span style="color:#10b981">${refundable} refund</span></div>
+     </div>`;
+
+  // Render table
+  document.getElementById('corpTableBody').innerHTML = _corpEmployees.map(e => {
+    const balColor = e.balance > 0 ? '#ef4444' : e.balance < 0 ? '#10b981' : 'var(--muted)';
+    const balLabel = e.balance > 0 ? 'Payable' : e.balance < 0 ? 'Refund' : 'Balanced';
+    const waText = encodeURIComponent(
+      `Hi ${e.name}, your AFS Tax Assistant summary for TY2026:\n` +
+      `Gross Salary: Rs ${fmt(e.salary)}\n` +
+      `Tax Liability: Rs ${fmt(e.totalTax)}\n` +
+      `WHT Deducted: Rs ${fmt(e.wht)}\n` +
+      `Balance: Rs ${fmt(Math.abs(e.balance))} ${balLabel}\n\n` +
+      `Prepared by AFS Consultants | +92 332 855 8734`
+    );
+    const phone = e.phone ? e.phone.replace(/[^0-9+]/g,'') : '923328558734';
+    const waNum = phone.startsWith('+') ? phone.slice(1) : (phone.startsWith('0') ? '92'+phone.slice(1) : phone);
+    return `<tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:10px 12px;color:var(--muted)">${e.idx}</td>
+      <td style="padding:10px 12px;font-weight:600;color:var(--text)">${e.name}</td>
+      <td style="padding:10px 12px;color:var(--muted);font-family:monospace">${e.cnic||'—'}</td>
+      <td style="padding:10px 12px;text-align:right">Rs ${fmt(e.salary)}</td>
+      <td style="padding:10px 12px;text-align:right;color:#f59e0b">Rs ${fmt(e.wht)}</td>
+      <td style="padding:10px 12px;text-align:right;color:#8b5cf6">Rs ${fmt(e.totalTax)}</td>
+      <td style="padding:10px 12px;text-align:right;font-weight:700;color:${balColor}">Rs ${fmt(Math.abs(e.balance))}<br><span style="font-size:10px">${balLabel}</span></td>
+      <td style="padding:10px 12px;text-align:center">
+        <div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap">
+          <button onclick="corpDownloadOnePDF(${e.idx-1})" style="background:rgba(239,68,68,.15);color:#f87171;border:none;padding:5px 10px;border-radius:6px;cursor:pointer;font-size:11px;font-weight:600">📄 PDF</button>
+          <a href="https://wa.me/${phone.startsWith('0')?'92'+phone.slice(1):waNum}?text=${waText}" target="_blank" style="background:#25d366;color:#fff;padding:5px 10px;border-radius:6px;font-size:11px;font-weight:600;text-decoration:none">💬 WA</a>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('corpResultTitle').textContent = company + ' — Employee Tax Summaries';
+  document.getElementById('corpResultCount').textContent = `${_corpEmployees.length} employees · TY ${document.getElementById('corpTaxYear').value}`;
+  document.getElementById('corpStep1').style.display = 'none';
+  document.getElementById('corpResults').style.display = 'block';
+}
+
+/* ── Generate PDF for single employee ── */
+function _corpBuildEmployeePDF(doc, emp, company, taxYear, addNewPage) {
+  if (!doc) return null;
+  if (addNewPage) doc.addPage();
+
+  const { jsPDF } = window.jspdf;
+  const PW = doc.internal.pageSize.getWidth();
+  const ML = 14, MR = 14;
+  let y = 18;
+
+  // Header bar
+  doc.setFillColor(13, 42, 74);
+  doc.rect(0, 0, PW, 14, 'F');
+  doc.setTextColor(255,255,255);
+  doc.setFontSize(10); doc.setFont('helvetica','bold');
+  doc.text('AFS Tax Assistant', ML, 9.5);
+  doc.setFontSize(8); doc.setFont('helvetica','normal');
+  doc.text('Tax Year ' + taxYear, PW - MR, 9.5, { align:'right' });
+
+  // Company name
+  doc.setTextColor(100,116,139);
+  doc.setFontSize(8);
+  doc.text(company, ML, y); y += 7;
+
+  // Employee name
+  doc.setTextColor(30,64,175);
+  doc.setFontSize(16); doc.setFont('helvetica','bold');
+  doc.text(emp.name, ML, y); y += 7;
+  doc.setFontSize(9); doc.setFont('helvetica','normal');
+  doc.setTextColor(100,116,139);
+  doc.text('CNIC: ' + (emp.cnic||'N/A') + '  |  Salaried Income', ML, y); y += 10;
+
+  // Divider
+  doc.setDrawColor(229,231,235); doc.setLineWidth(0.3);
+  doc.line(ML, y, PW-MR, y); y += 8;
+
+  // Summary table
+  const rows = [
+    ['Gross Salary', 'Rs ' + fmt(emp.salary)],
+    ['Tax Liability (Slab)', 'Rs ' + fmt(emp.taxGross)],
+    emp.surcharge > 0 ? ['Surcharge (9% u/s 4AB)', 'Rs ' + fmt(emp.surcharge)] : null,
+    ['Total Tax Chargeable', 'Rs ' + fmt(emp.totalTax)],
+    ['WHT Deducted by Employer (s.149)', '(Rs ' + fmt(emp.wht) + ')'],
+  ].filter(Boolean);
+
+  doc.setFontSize(10);
+  rows.forEach(([label, val]) => {
+    doc.setFont('helvetica','normal'); doc.setTextColor(71,85,105);
+    doc.text(label, ML, y);
+    doc.setFont('helvetica','bold'); doc.setTextColor(30,41,59);
+    doc.text(val, PW-MR, y, { align:'right' });
+    y += 8;
+  });
+
+  // Balance box
+  y += 4;
+  const isPayable = emp.balance > 0;
+  const isRefund  = emp.balance < 0;
+  doc.setFillColor(isPayable ? 254 : isRefund ? 240 : 248, isPayable ? 242 : isRefund ? 253 : 250, isPayable ? 242 : isRefund ? 244 : 248);
+  doc.roundedRect(ML, y, PW-ML-MR, 16, 3, 3, 'F');
+  doc.setFontSize(11); doc.setFont('helvetica','bold');
+  doc.setTextColor(isPayable ? 220 : isRefund ? 16 : 100, isPayable ? 38 : isRefund ? 185 : 116, isPayable ? 38 : isRefund ? 129 : 139);
+  const balLabel = isPayable ? 'Tax Payable' : isRefund ? 'Tax Refund' : 'Balanced';
+  doc.text(balLabel, ML+6, y+10);
+  doc.text('Rs ' + fmt(Math.abs(emp.balance)), PW-MR-4, y+10, { align:'right' });
+  y += 24;
+
+  // Footer
+  doc.setFontSize(7); doc.setTextColor(148,163,184); doc.setFont('helvetica','normal');
+  const PH = doc.internal.pageSize.getHeight();
+  doc.text('AFS Consultants | Tax · Corporate · Advisory · Accounting', ML, PH-9);
+  doc.text('+92 332 855 8734  |  wa.me/923328558734', PW-MR, PH-9, { align:'right' });
+  doc.text('AI-generated summary. Not a substitute for official FBR filing.', ML, PH-5);
+  doc.text(new Date().toLocaleDateString('en-PK'), PW-MR, PH-5, { align:'right' });
+}
+
+/* ── Download individual PDF ── */
+function corpDownloadOnePDF(idx) {
+  if (!window.jspdf) { toast('PDF library not loaded.', true); return; }
+  const { jsPDF } = window.jspdf;
+  const emp = _corpEmployees[idx];
+  const company = document.getElementById('corpResultTitle').textContent.split(' — ')[0];
+  const taxYear = document.getElementById('corpTaxYear').value;
+  const doc = new jsPDF({ unit:'mm', format:'a4' });
+  _corpBuildEmployeePDF(doc, emp, company, taxYear, false);
+  doc.save('AFS_' + company.replace(/\s+/g,'_') + '_' + (emp.name||'Emp').replace(/\s+/g,'_') + '_TY' + taxYear + '.pdf');
+}
+
+/* ── Download combined PDF (all employees, one per page) ── */
+function corpDownloadCombinedPDF() {
+  if (!_corpEmployees.length) return;
+  if (!window.jspdf) { toast('PDF library not loaded.', true); return; }
+  const { jsPDF } = window.jspdf;
+  const company = document.getElementById('corpResultTitle').textContent.split(' — ')[0];
+  const taxYear = document.getElementById('corpTaxYear').value;
+  const doc = new jsPDF({ unit:'mm', format:'a4' });
+  _corpEmployees.forEach((emp, i) => {
+    _corpBuildEmployeePDF(doc, emp, company, taxYear, i > 0);
+  });
+  doc.save('AFS_' + company.replace(/\s+/g,'_') + '_AllEmployees_TY' + taxYear + '.pdf');
+  toast('✅ Combined PDF downloaded — ' + _corpEmployees.length + ' employees');
+}
+
+/* ── Download all individual PDFs one by one ── */
+async function corpDownloadAllPDFs() {
+  if (!_corpEmployees.length) return;
+  if (!window.jspdf) { toast('PDF library not loaded.', true); return; }
+  const company = document.getElementById('corpResultTitle').textContent.split(' — ')[0];
+  const taxYear = document.getElementById('corpTaxYear').value;
+  toast('Generating ' + _corpEmployees.length + ' PDFs…');
+  for (let i = 0; i < _corpEmployees.length; i++) {
+    await new Promise(r => setTimeout(r, 150));
+    corpDownloadOnePDF(i);
+  }
+  toast('✅ All ' + _corpEmployees.length + ' PDFs downloaded');
+}
+</script>
+
+<script>
+/* ══════════════════════════════════════════════════════
+   P3 — CONSULTATION REQUEST
+   ══════════════════════════════════════════════════════ */
+function submitConsultation() {
+  const name    = document.getElementById('cns_name').value.trim();
+  const phone   = document.getElementById('cns_phone').value.trim();
+  const email   = document.getElementById('cns_email').value.trim();
+  const service = document.getElementById('cns_service').value;
+  const time    = document.getElementById('cns_time').value.trim();
+  const msg     = document.getElementById('cns_msg').value.trim();
+  if (!name || !phone) { alert('Please enter your name and phone number.'); return; }
+
+  const waMsg = encodeURIComponent(
+    `📋 *Consultation Request — AFS Tax Assistant*\n\n` +
+    `👤 Name: ${name}\n📞 Phone: ${phone}\n📧 Email: ${email||'—'}\n` +
+    `🔧 Service: ${service}\n⏰ Preferred Time: ${time||'Flexible'}\n\n💬 ${msg||'Please contact me at your earliest convenience.'}`
+  );
+  window.open(`https://wa.me/923328558734?text=${waMsg}`, '_blank');
+
+  // Save locally
+  const req = { name, phone, email, service, time, msg, date: new Date().toLocaleDateString('en-PK'), status: 'Pending' };
+  const hist = JSON.parse(localStorage.getItem('afs_consult_history')||'[]');
+  hist.unshift(req);
+  localStorage.setItem('afs_consult_history', JSON.stringify(hist.slice(0,20)));
+  renderConsultHistory();
+  ['cns_name','cns_phone','cns_email','cns_time','cns_msg'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+}
+
+function renderConsultHistory() {
+  const hist = JSON.parse(localStorage.getItem('afs_consult_history')||'[]');
+  const el = document.getElementById('cns_history');
+  if (!el || !hist.length) return;
+  el.innerHTML = `<div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:8px">Previous Requests</div>` +
+    hist.map(r => `<div style="background:var(--bg);border-radius:8px;padding:10px 12px;margin-bottom:8px;font-size:12px;border:1px solid var(--border)">
+      <span style="font-weight:600">${r.service}</span> — ${r.name} · ${r.date}
+      <span style="float:right;background:rgba(245,158,11,.15);color:#f59e0b;padding:2px 8px;border-radius:5px;font-size:10px">${r.status}</span>
+    </div>`).join('');
+}
+
+/* ══════════════════════════════════════════════════════
+   P4 — NTN REGISTRATION WIZARD
+   ══════════════════════════════════════════════════════ */
+function ntnGo(step) {
+  [1,2,3,4].forEach(s => {
+    document.getElementById('ntnPanel'+s).style.display = s===step ? 'block' : 'none';
+    const btn = document.querySelector('.ntn-step[data-step="'+s+'"]');
+    if (btn) {
+      btn.style.background = s===step ? '#1d4ed8' : 'var(--bg)';
+      btn.style.color = s===step ? '#fff' : 'var(--muted)';
+    }
+  });
+}
+function ntnNext(from) {
+  if (from===1) {
+    if (!document.getElementById('ntn_name').value.trim() || !document.getElementById('ntn_cnic').value.trim()) {
+      alert('Please fill in Name and CNIC.'); return;
+    }
+    ntnGo(2);
+  } else if (from===2) {
+    if (!document.getElementById('ntn_phone').value.trim() || !document.getElementById('ntn_city').value.trim()) {
+      alert('Please fill in Phone and City.'); return;
+    }
+    ntnGo(3);
+  } else if (from===3) {
+    const income = document.querySelector('input[name="ntn_income"]:checked')?.value || 'Salaried';
+    ntnGo(4);
+    // Build review
+    const v = id => document.getElementById(id)?.value||'—';
+    document.getElementById('ntnReview').innerHTML = [
+      ['Full Name', v('ntn_name')], ['Father\'s Name', v('ntn_father')],
+      ['CNIC', v('ntn_cnic')], ['Date of Birth', v('ntn_dob')], ['Gender', v('ntn_gender')],
+      ['Phone', v('ntn_phone')], ['Email', v('ntn_email')],
+      ['City', v('ntn_city')], ['Address', v('ntn_addr')], ['Income Type', income]
+    ].map(([k,val]) => `<div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding:4px 0"><span style="color:var(--muted)">${k}</span><strong>${val}</strong></div>`).join('');
+    // Build WA link
+    const waMsg = encodeURIComponent(
+      `📋 *NTN Registration Request — AFS Tax Assistant*\n\n` +
+      `Name: ${v('ntn_name')}\nFather: ${v('ntn_father')}\nCNIC: ${v('ntn_cnic')}\n` +
+      `DOB: ${v('ntn_dob')}\nGender: ${v('ntn_gender')}\n` +
+      `Phone: ${v('ntn_phone')}\nEmail: ${v('ntn_email')}\n` +
+      `City: ${v('ntn_city')}\nAddress: ${v('ntn_addr')}\n` +
+      `Income Type: ${income}\n\nPlease register my NTN within 24 hours.`
+    );
+    document.getElementById('ntnWABtn').href = `https://wa.me/923328558734?text=${waMsg}`;
+  }
+}
+
+/* ══════════════════════════════════════════════════════
+   P5 — TAX CALENDAR
+   ══════════════════════════════════════════════════════ */
+function renderCalendar() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const deadlines = [
+    { date:'2026-09-30', label:'Income Tax Return Filing (TY2026)', type:'Annual' },
+    { date:'2026-09-15', label:'Advance Tax Q1 (Apr–Jun 2026) u/s 147', type:'Advance Tax' },
+    { date:'2026-12-15', label:'Advance Tax Q2 (Jul–Sep 2026) u/s 147', type:'Advance Tax' },
+    { date:'2027-03-15', label:'Advance Tax Q3 (Oct–Dec 2026) u/s 147', type:'Advance Tax' },
+    { date:'2027-06-15', label:'Advance Tax Q4 (Jan–Mar 2027) u/s 147', type:'Advance Tax' },
+    { date:'2026-07-15', label:'Monthly WHT Deposit — July 2026', type:'WHT Monthly' },
+    { date:'2026-08-15', label:'Monthly WHT Deposit — August 2026', type:'WHT Monthly' },
+    { date:'2026-09-15', label:'Monthly WHT Deposit — September 2026', type:'WHT Monthly' },
+    { date:'2026-07-18', label:'Sales Tax Return — July 2026', type:'Sales Tax' },
+    { date:'2026-08-18', label:'Sales Tax Return — August 2026', type:'Sales Tax' },
+    { date:'2026-09-18', label:'Sales Tax Return — September 2026', type:'Sales Tax' },
+  ];
+
+  const typeColor = { 'Annual':'#3b82f6','Advance Tax':'#8b5cf6','WHT Monthly':'#f59e0b','Sales Tax':'#10b981' };
+
+  const el = document.getElementById('calDeadlines');
+  if (!el) return;
+
+  el.innerHTML = deadlines.map((d,i) => {
+    const due = new Date(d.date); due.setHours(0,0,0,0);
+    const diff = Math.round((due - today) / 86400000);
+    const isOverdue = diff < 0;
+    const isUrgent  = diff >= 0 && diff <= 7;
+    const color = isOverdue ? '#ef4444' : isUrgent ? '#f59e0b' : '#10b981';
+    const tag   = isOverdue ? `Overdue by ${Math.abs(diff)}d` : diff===0 ? 'TODAY' : `${diff} days left`;
+    return `<div style="background:var(--surface);border:1px solid var(--border);border-left:4px solid ${color};border-radius:10px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+      <div style="flex:1;min-width:200px">
+        <div style="font-size:13px;font-weight:700;color:var(--text)">${d.label}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:3px">
+          <span style="background:${typeColor[d.type]||'#64748b'}22;color:${typeColor[d.type]||'#64748b'};padding:2px 8px;border-radius:5px;font-weight:600">${d.type}</span>
+          &nbsp; ${new Date(d.date).toLocaleDateString('en-PK',{day:'numeric',month:'short',year:'numeric'})}
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:12px;font-weight:700;color:${color};background:${color}22;padding:4px 12px;border-radius:20px">${tag}</span>
+        <button onclick="setCalReminder('${d.date}','${d.label.replace(/'/g,"\\'")}',${i})" style="background:rgba(59,130,246,.12);color:#3b82f6;border:1px solid rgba(59,130,246,.25);padding:5px 12px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer" id="remBtn${i}">🔔 Remind Me</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function setCalReminder(dateStr, label, idx) {
+  if (!('Notification' in window)) { alert('Browser notifications not supported.'); return; }
+  Notification.requestPermission().then(perm => {
+    if (perm !== 'granted') { alert('Please allow notifications in your browser settings.'); return; }
+    // Store reminder in localStorage
+    const reminders = JSON.parse(localStorage.getItem('afs_reminders')||'[]');
+    if (!reminders.find(r => r.date===dateStr && r.label===label)) {
+      reminders.push({ date:dateStr, label, set: new Date().toISOString() });
+      localStorage.setItem('afs_reminders', JSON.stringify(reminders));
+    }
+    const btn = document.getElementById('remBtn'+idx);
+    if (btn) { btn.textContent = '✅ Set'; btn.style.background='rgba(16,185,129,.15)'; btn.style.color='#10b981'; }
+    // Fire notification immediately as confirmation
+    new Notification('AFS Tax Calendar 🔔', {
+      body: 'Reminder set for: ' + label + ' (' + new Date(dateStr).toLocaleDateString('en-PK') + ')',
+      icon: '/icons/icon-192.png'
+    });
+    // Check due reminders on load (7-day and 1-day warnings done via checkReminders())
+  });
+}
+
+function checkReminders() {
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+  const reminders = JSON.parse(localStorage.getItem('afs_reminders')||'[]');
+  const today = new Date(); today.setHours(0,0,0,0);
+  reminders.forEach(r => {
+    const due = new Date(r.date); due.setHours(0,0,0,0);
+    const diff = Math.round((due - today) / 86400000);
+    if (diff === 7 || diff === 1 || diff === 0) {
+      const fired = localStorage.getItem('afs_rem_fired_'+r.date+'_'+diff);
+      if (!fired) {
+        localStorage.setItem('afs_rem_fired_'+r.date+'_'+diff, '1');
+        new Notification('⚠️ FBR Deadline ' + (diff===0?'TODAY':diff===1?'Tomorrow':'in 7 days'), {
+          body: r.label + ' — ' + new Date(r.date).toLocaleDateString('en-PK'),
+          icon: '/icons/icon-192.png'
+        });
+      }
+    }
+  });
+}
+
+/* ══════════════════════════════════════════════════════
+   P6 — FBR NOTICE TRACKER
+   ══════════════════════════════════════════════════════ */
+function submitNotice() {
+  const num  = document.getElementById('ntc_num').value.trim();
+  const type = document.getElementById('ntc_type').value;
+  const desc = document.getElementById('ntc_desc').value.trim();
+  if (!desc && !num) { alert('Please enter a notice number or description.'); return; }
+  const waMsg = encodeURIComponent(
+    `⚠️ *FBR Notice — Help Request*\n\nNotice No: ${num||'N/A'}\nType: ${type}\nDetails: ${desc||'—'}\n\nPlease help me respond to this notice.`
+  );
+  window.open(`https://wa.me/923328558734?text=${waMsg}`, '_blank');
+  // Save locally
+  const notices = JSON.parse(localStorage.getItem('afs_notices')||'[]');
+  notices.unshift({ num, type, desc, date: new Date().toLocaleDateString('en-PK'), status:'Pending' });
+  localStorage.setItem('afs_notices', JSON.stringify(notices.slice(0,50)));
+  renderNoticeHistory();
+  document.getElementById('ntc_num').value=''; document.getElementById('ntc_desc').value='';
+}
+
+function renderNoticeHistory() {
+  const notices = JSON.parse(localStorage.getItem('afs_notices')||'[]');
+  const el = document.getElementById('noticeHistory');
+  if (!el || !notices.length) return;
+  el.innerHTML = `<div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:8px">Notice History</div>` +
+    notices.map(n => `<div style="background:var(--bg);border-radius:8px;padding:10px 12px;margin-bottom:8px;font-size:12px;border:1px solid var(--border)">
+      <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+        <strong>${n.type}${n.num?' — '+n.num:''}</strong>
+        <span style="background:rgba(245,158,11,.15);color:#f59e0b;padding:2px 8px;border-radius:5px;font-size:10px">${n.status}</span>
+      </div>
+      <div style="color:var(--muted)">${n.desc||'—'} · ${n.date}</div>
+    </div>`).join('');
+}
+
+/* ══════════════════════════════════════════════════════
+   P2 — REFERRAL SYSTEM
+   ══════════════════════════════════════════════════════ */
+function _genRefCode(id) {
+  // Simple deterministic 6-char code from CNIC/email
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) hash = ((hash << 5) - hash + id.charCodeAt(i)) | 0;
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code = '';
+  let h = Math.abs(hash);
+  for (let i = 0; i < 6; i++) { code += chars[h % chars.length]; h = Math.floor(h / chars.length); }
+  return code;
+}
+
+function initReferral() {
+  const sess = typeof getSession === 'function' ? getSession() : null;
+  const userId = sess ? (sess.id||sess.uid||'guest') : 'guest';
+  const code = _genRefCode(userId);
+  const refEl = document.getElementById('refCode');
+  if (refEl) refEl.textContent = code;
+
+  const stats = JSON.parse(localStorage.getItem('afs_ref_stats')||'{"count":0,"savings":0}');
+  const countEl = document.getElementById('refCount'); if (countEl) countEl.textContent = stats.count;
+  const savEl = document.getElementById('refSavings'); if (savEl) savEl.textContent = 'Rs ' + fmt(stats.savings);
+
+  const waBtn = document.getElementById('refWABtn');
+  if (waBtn) {
+    const waMsg = encodeURIComponent(
+      `I'm using AFS Tax Assistant to file my taxes — it's free!\nUse my code *${code}* for 15% OFF your first filing.\n\nhttps://gofiler.vercel.app`
+    );
+    waBtn.href = `https://wa.me/?text=${waMsg}`;
+  }
+
+  // Show applied codes
+  const applied = JSON.parse(localStorage.getItem('afs_ref_applied')||'[]');
+  const listEl = document.getElementById('refCodeList');
+  if (listEl && applied.length) {
+    listEl.innerHTML = `<div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:6px">Applied Codes</div>` +
+      applied.map(c => `<div style="background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2);border-radius:7px;padding:7px 12px;font-size:12px;margin-bottom:6px">✅ Code <strong>${c.code}</strong> applied — 15% discount on your next filing</div>`).join('');
+  }
+}
+
+function copyRefCode() {
+  const code = document.getElementById('refCode')?.textContent;
+  if (code && code !== '—') { navigator.clipboard.writeText(code).then(() => toast('✅ Referral code copied!')); }
+}
+
+function applyRefCode() {
+  const code = (document.getElementById('refInput')?.value||'').trim().toUpperCase();
+  const myCode = document.getElementById('refCode')?.textContent;
+  const msgEl = document.getElementById('refApplyMsg');
+  if (!code || code.length < 4) { if(msgEl) msgEl.style.color='#f87171', msgEl.textContent='Enter a valid referral code.'; return; }
+  if (code === myCode) { if(msgEl) msgEl.style.color='#f87171', msgEl.textContent="You can't apply your own code!"; return; }
+  const applied = JSON.parse(localStorage.getItem('afs_ref_applied')||'[]');
+  if (applied.find(c => c.code===code)) { if(msgEl) msgEl.style.color='#f59e0b', msgEl.textContent='This code has already been applied.'; return; }
+  applied.push({ code, date: new Date().toLocaleDateString('en-PK') });
+  localStorage.setItem('afs_ref_applied', JSON.stringify(applied));
+  if(msgEl) { msgEl.style.color='#10b981'; msgEl.textContent='✅ Code applied! 15% discount on your next filing with AFS.'; }
+  document.getElementById('refInput').value = '';
+  initReferral();
+  toast('🎉 Referral code applied — 15% OFF your next filing!');
+}
+
+/* ══════════════════════════════════════════════════════
+   P7 — BUSINESS INCOME ESTIMATOR (Tax Planner extension)
+   ══════════════════════════════════════════════════════ */
+function initBusinessEstimator() {
+  const container = document.getElementById('bizEstimator');
+  if (!container || container.dataset.init) return;
+  container.dataset.init = '1';
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  let html = `<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px">
+    <thead><tr style="background:var(--bg)">
+      <th style="padding:8px 10px;text-align:left;color:var(--muted);border-bottom:1px solid var(--border)">Month</th>
+      <th style="padding:8px 10px;text-align:right;color:var(--muted);border-bottom:1px solid var(--border)">Revenue (Rs)</th>
+      <th style="padding:8px 10px;text-align:right;color:var(--muted);border-bottom:1px solid var(--border)">Expenses (Rs)</th>
+      <th style="padding:8px 10px;text-align:right;color:var(--muted);border-bottom:1px solid var(--border)">Net Profit</th>
+    </tr></thead><tbody>`;
+  months.forEach((m,i) => {
+    html += `<tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:7px 10px;font-weight:600;color:var(--text)">${m}</td>
+      <td style="padding:4px 6px"><input type="number" id="biz_rev_${i}" min="0" placeholder="0" oninput="updateBizEstimate()" style="width:100%;padding:6px 8px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:12px;text-align:right"></td>
+      <td style="padding:4px 6px"><input type="number" id="biz_exp_${i}" min="0" placeholder="0" oninput="updateBizEstimate()" style="width:100%;padding:6px 8px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:12px;text-align:right"></td>
+      <td id="biz_np_${i}" style="padding:7px 10px;text-align:right;font-weight:600;color:var(--muted)">—</td>
+    </tr>`;
+  });
+  html += `</tbody><tfoot><tr style="background:var(--bg)">
+    <td style="padding:10px;font-weight:800;color:var(--text)">ANNUAL TOTAL</td>
+    <td id="biz_total_rev" style="padding:10px;text-align:right;font-weight:700;color:#3b82f6">Rs 0</td>
+    <td id="biz_total_exp" style="padding:10px;text-align:right;font-weight:700;color:#ef4444">Rs 0</td>
+    <td id="biz_total_np"  style="padding:10px;text-align:right;font-weight:700;color:#10b981">Rs 0</td>
+  </tr></tfoot></table></div>
+  <div id="bizSummaryCards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:14px"></div>
+  <div id="bizChart" style="margin-top:14px;overflow-x:auto"></div>
+  <button onclick="bizApplyToPlanner()" style="margin-top:14px;background:linear-gradient(135deg,#1d4ed8,#7c3aed);color:#fff;border:none;width:100%;padding:11px;border-radius:9px;font-weight:700;font-size:13px;cursor:pointer">📊 Apply Annual Figures to Tax Planner</button>`;
+  container.innerHTML = html;
+}
+
+function updateBizEstimate() {
+  let totalRev=0, totalExp=0;
+  const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const profits = [];
+  for (let i=0;i<12;i++) {
+    const rev = Number(document.getElementById('biz_rev_'+i)?.value||0);
+    const exp = Number(document.getElementById('biz_exp_'+i)?.value||0);
+    const np  = rev - exp;
+    totalRev += rev; totalExp += exp;
+    profits.push(np);
+    const npEl = document.getElementById('biz_np_'+i);
+    if (npEl) { npEl.textContent = 'Rs ' + fmt(np); npEl.style.color = np>=0?'#10b981':'#ef4444'; }
+  }
+  const annualProfit = totalRev - totalExp;
+  document.getElementById('biz_total_rev').textContent = 'Rs ' + fmt(totalRev);
+  document.getElementById('biz_total_exp').textContent = 'Rs ' + fmt(totalExp);
+  document.getElementById('biz_total_np').textContent  = 'Rs ' + fmt(annualProfit);
+  document.getElementById('biz_total_np').style.color  = annualProfit>=0?'#10b981':'#ef4444';
+
+  // Tax estimate (non-salaried slabs — business income)
+  let estTax = 0;
+  const t = annualProfit;
+  if (t > 600000) {
+    if (t<=1200000)      estTax = Math.round(0.075*(t-600000));
+    else if (t<=2400000) estTax = Math.round(45000+0.15*(t-1200000));
+    else if (t<=3600000) estTax = Math.round(225000+0.20*(t-2400000));
+    else if (t<=6000000) estTax = Math.round(465000+0.25*(t-3600000));
+    else                 estTax = Math.round(1065000+0.35*(t-6000000));
+  }
+  const advQ = estTax > 0 ? Math.round(estTax/4) : 0;
+
+  const sc = (lbl,val,color) => `<div style="background:var(--bg);border-radius:9px;padding:12px;border:1px solid var(--border);text-align:center"><div style="font-size:10px;color:var(--muted);margin-bottom:3px">${lbl}</div><div style="font-size:14px;font-weight:800;color:${color||'var(--text)'}">${val}</div></div>`;
+  document.getElementById('bizSummaryCards').innerHTML =
+    sc('Annual Revenue','Rs '+fmt(totalRev),'#3b82f6') +
+    sc('Annual Expenses','Rs '+fmt(totalExp),'#ef4444') +
+    sc('Net Profit','Rs '+fmt(annualProfit),annualProfit>=0?'#10b981':'#ef4444') +
+    sc('Est. Tax Liability','Rs '+fmt(estTax),'#8b5cf6') +
+    sc('Advance Tax /Qtr','Rs '+fmt(advQ),'#f59e0b');
+
+  // Simple SVG bar chart
+  const maxP = Math.max(...profits.map(Math.abs), 1);
+  const bars = profits.map((p,i) => {
+    const h = Math.round((Math.abs(p)/maxP)*60);
+    const col = p>=0?'#10b981':'#ef4444';
+    const x = i*18+2;
+    return `<rect x="${x}" y="${64-h}" width="14" height="${h}" fill="${col}" rx="2" opacity="0.85"/>
+            <text x="${x+7}" y="76" font-size="7" text-anchor="middle" fill="#94a3b8">${months[i].slice(0,1)}</text>`;
+  }).join('');
+  document.getElementById('bizChart').innerHTML = `
+    <div style="font-size:11px;font-weight:600;color:var(--muted);margin-bottom:6px">Monthly Net Profit</div>
+    <svg viewBox="0 0 220 80" style="width:100%;max-width:500px;height:80px">
+      <line x1="0" y1="64" x2="220" y2="64" stroke="#334155" stroke-width="0.5"/>
+      ${bars}
+    </svg>`;
+}
+
+function bizApplyToPlanner() {
+  let totalRev=0, totalExp=0;
+  for(let i=0;i<12;i++){totalRev+=Number(document.getElementById('biz_rev_'+i)?.value||0);totalExp+=Number(document.getElementById('biz_exp_'+i)?.value||0);}
+  const profit = totalRev-totalExp;
+  // Push to planner fields if they exist
+  const revEl = document.getElementById('planRevenue')||document.getElementById('pl_revenue');
+  const expEl = document.getElementById('planExpenses')||document.getElementById('pl_expenses');
+  const np    = document.getElementById('planNetProfit')||document.getElementById('pl_netprofit');
+  if (revEl) revEl.value = totalRev;
+  if (expEl) expEl.value = totalExp;
+  if (np) np.value = profit;
+  // Also update D
+  if (typeof D !== 'undefined') { D.businessRevenue = totalRev; D.businessCostOfSales = totalExp; }
+  toast('✅ Annual figures applied to Tax Planner — Rs '+fmt(profit)+' net profit');
+  // Switch to planner tab
+  document.querySelector('.nav-item[data-tab="planner"]')?.click();
+}
+
+/* ══════════════════════════════════════════════════════
+   INIT — hook into tab switching
+   ══════════════════════════════════════════════════════ */
+(function() {
+  // Extend tab click handler to init features on first visit
+  const origHandler = window._tabSwitchHooked;
+  if (!origHandler) {
+    window._tabSwitchHooked = true;
+    document.addEventListener('click', function(e) {
+      const navItem = e.target.closest('.nav-item[data-tab]');
+      if (!navItem) return;
+      const tab = navItem.dataset.tab;
+      if (tab === 'calendar')  { setTimeout(renderCalendar, 50); setTimeout(renderNoticeHistory, 50); }
+      if (tab === 'referral')  { setTimeout(initReferral, 50); }
+      if (tab === 'consult')   { setTimeout(renderConsultHistory, 50); }
+      if (tab === 'planner')   { setTimeout(initBusinessEstimator, 50); }
+    });
+  }
+
+  // Check reminders on page load
+  setTimeout(checkReminders, 2000);
+})();
+</script>
